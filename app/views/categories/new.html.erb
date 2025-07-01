@@ -1,0 +1,146 @@
+<!-- モバイル用ヘッダー -->
+<div class="lg:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+  <div class="flex items-center">
+    <%= link_to categories_path, class: "mr-3 text-gray-600" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    <h1 class="text-xl font-bold text-gray-800">カテゴリ追加</h1>
+  </div>
+</div>
+
+<div class="lg:ml-64 p-4 lg:p-6">
+  <!-- デスクトップ用ヘッダー -->
+  <div class="hidden lg:flex items-center mb-6">
+    <%= link_to categories_path, class: "mr-4 text-gray-600 hover:text-gray-800" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    <h1 class="text-2xl font-bold text-gray-800">カスタムカテゴリの追加</h1>
+  </div>
+
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <%= form_with model: @category, local: true, class: "space-y-6" do |f| %>
+        <% if @category.errors.any? %>
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <svg class="w-5 h-5 text-red-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <div>
+                <h3 class="text-sm font-medium text-red-800">エラーが発生しました</h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc pl-5 space-y-1">
+                    <% @category.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- 基本情報 -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">基本情報</h3>
+          
+          <div>
+            <%= f.label :name, "カテゴリ名", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :name, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder: "例: 推しA専用" %>
+          </div>
+
+          <div>
+            <%= f.label :category_type, "カテゴリタイプ", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :category_type, 
+                options_for_select([
+                  ['推し活', 'oshi'],
+                  ['生活', 'life'],
+                  ['交通', 'transport'],
+                  ['健康', 'health'],
+                  ['学習', 'education'],
+                  ['娯楽', 'entertainment'],
+                  ['その他', 'other']
+                ], @category.category_type),
+                { prompt: 'タイプを選択してください' },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" } %>
+          </div>
+
+          <div>
+            <%= f.label :parent_id, "親カテゴリ（任意）", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.collection_select :parent_id, @parent_categories, :id, :name,
+                { prompt: '親カテゴリを選択（サブカテゴリにする場合）' },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" } %>
+            <p class="mt-1 text-sm text-gray-500">
+              既存のカテゴリ配下に作成する場合は選択してください
+            </p>
+          </div>
+        </div>
+
+        <!-- デザイン設定 -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">デザイン設定</h3>
+          
+          <div>
+            <%= f.label :icon, "アイコン（絵文字）", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :icon, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder: "例: 🎤 🎁 ⭐" %>
+            <p class="mt-1 text-sm text-gray-500">
+              絵文字を1文字入力してください。空欄の場合はタイプに応じたデフォルトアイコンが使用されます
+            </p>
+          </div>
+
+          <div>
+            <%= f.label :color, "カラー", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <% ['#e74c3c', '#3498db', '#f39c12', '#27ae60', '#9b59b6', '#e67e22', '#34495e', '#1abc9c', '#f1c40f', '#e91e63'].each do |color| %>
+                <button type="button" 
+                        class="w-8 h-8 rounded-full border-2 border-gray-200 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 color-option"
+                        style="background-color: <%= color %>"
+                        data-color="<%= color %>">
+                </button>
+              <% end %>
+            </div>
+            <%= f.color_field :color, class: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", value: @category.color || "#3498db" %>
+          </div>
+        </div>
+
+        <!-- ボタン -->
+        <div class="flex flex-col sm:flex-row gap-3 pt-6">
+          <%= f.submit "カテゴリを作成", class: "w-full sm:w-auto inline-flex justify-center items-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <%= link_to categories_path, class: "w-full sm:w-auto inline-flex justify-center items-center px-6 py-2 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            キャンセル
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const colorOptions = document.querySelectorAll('.color-option');
+  const colorInput = document.querySelector('input[type="color"]');
+  
+  colorOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      const color = this.getAttribute('data-color');
+      colorInput.value = color;
+      
+      // 選択状態の更新
+      colorOptions.forEach(opt => opt.classList.remove('ring-2', 'ring-blue-500'));
+      this.classList.add('ring-2', 'ring-blue-500');
+    });
+  });
+  
+  // 初期選択状態の設定
+  const currentColor = colorInput.value;
+  colorOptions.forEach(option => {
+    if (option.getAttribute('data-color') === currentColor) {
+      option.classList.add('ring-2', 'ring-blue-500');
+    }
+  });
+});
+</script>

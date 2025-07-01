@@ -1,0 +1,99 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 lg:ml-64">
+  <!-- モバイル用ページヘッダー -->
+  <div class="lg:hidden bg-white/95 backdrop-blur-lg border-b border-white/30 p-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1 class="text-lg font-bold text-blue-600">
+        <% if @reservation_type == 'lottery' %>
+          🎲 新規抽選申込
+        <% else %>
+          📦 新規予約購入
+        <% end %>
+      </h1>
+    </div>
+    <div>
+      <%= link_to reservations_path, class: "bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    
+    <!-- デスクトップ用ヘッダー -->
+    <div class="hidden lg:block bg-white/95 backdrop-blur-lg border border-white/30 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+            <% if @reservation_type == 'lottery' %>
+              🎲 新規抽選申込
+            <% else %>
+              📦 新規予約購入
+            <% end %>
+          </h1>
+          <p class="text-sm sm:text-base text-gray-600">
+            <% if @reservation_type == 'lottery' %>
+              チケット抽選申込を登録
+            <% else %>
+              商品予約を登録
+            <% end %>
+          </p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <%= link_to reservations_path, 
+                      class: "bg-gray-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-gray-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-arrow-left mr-1 sm:mr-2"></i>一覧に戻る
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- タイプ切り替えタブ -->
+    <div class="max-w-2xl mx-auto mb-4 sm:mb-6">
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-lg p-1 shadow-md">
+        <div class="grid grid-cols-2 gap-1">
+          <%= link_to new_reservation_path(type: 'confirmed'), 
+                      class: "text-center py-2 sm:py-3 px-4 rounded-md transition-all #{@reservation_type == 'confirmed' ? 'bg-blue-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}" do %>
+            <i class="fas fa-shopping-cart mr-1 sm:mr-2"></i>
+            <span class="text-sm sm:text-base font-medium">予約購入</span>
+          <% end %>
+          <%= link_to new_reservation_path(type: 'lottery'), 
+                      class: "text-center py-2 sm:py-3 px-4 rounded-md transition-all #{@reservation_type == 'lottery' ? 'bg-purple-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}" do %>
+            <i class="fas fa-dice mr-1 sm:mr-2"></i>
+            <span class="text-sm sm:text-base font-medium">抽選購入</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- メインフォーム -->
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
+        <% if @reservation_type == 'lottery' %>
+          <%= render 'form_lottery' %>
+        <% else %>
+          <%= render 'form_confirmed' %>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- レスポンシブ用のカスタムスタイル -->
+<style>
+  /* スモールデバイス用の調整 */
+  @media (max-width: 640px) {
+    .grid-cols-1.sm\:grid-cols-3 > label > div,
+    .grid-cols-2.sm\:grid-cols-4 > label > div {
+      min-height: 80px;
+    }
+  }
+  
+  /* 超ワイドスクリーン用の調整 */
+  @media (min-width: 1536px) {
+    .w-full {
+      max-width: 1536px;
+      margin: 0 auto;
+    }
+  }
+</style>

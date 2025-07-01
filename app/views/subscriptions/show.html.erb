@@ -1,0 +1,210 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 lg:ml-64">
+  <!-- モバイル用ページヘッダー -->
+  <div class="lg:hidden bg-white/95 backdrop-blur-lg border-b border-white/30 p-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1 class="text-lg font-bold text-blue-600">👀 サブスク詳細</h1>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to edit_subscription_path(@subscription), class: "bg-blue-500 text-white py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-edit"></i>
+      <% end %>
+      <%= link_to subscriptions_path, class: "bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    
+    <!-- デスクトップ用ヘッダー -->
+    <div class="hidden lg:block bg-white/95 backdrop-blur-lg border border-white/30 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+            👀 サブスクリプション詳細
+          </h1>
+          <p class="text-sm sm:text-base text-gray-600">サブスクリプション内容の詳細表示</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <%= link_to edit_subscription_path(@subscription), 
+                      class: "bg-blue-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-blue-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-edit mr-1 sm:mr-2"></i>編集
+          <% end %>
+          <%= link_to subscriptions_path, 
+                      class: "bg-gray-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-gray-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-arrow-left mr-1 sm:mr-2"></i>一覧に戻る
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- メイン詳細 -->
+    <div class="max-w-4xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        
+        <!-- 基本情報 -->
+        <div class="lg:col-span-2">
+          <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+            <h2 class="text-lg sm:text-xl font-bold text-blue-600 mb-4 sm:mb-6 flex items-center">
+              <i class="fas fa-info-circle mr-2 sm:mr-3"></i>
+              基本情報
+            </h2>
+
+            <div class="space-y-4 sm:space-y-6">
+              <!-- サービス名と金額 -->
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 bg-white/50 rounded-lg">
+                <div class="mb-2 sm:mb-0">
+                  <div class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+                    <%= @subscription.memo.present? ? @subscription.memo : "サブスクリプション#{@subscription.id}" %>
+                  </div>
+                  <div class="text-sm text-gray-600">
+                    <%= @subscription.billing_cycle == 'monthly' ? '月額' : @subscription.billing_cycle == 'yearly' ? '年額' : 'その他' %>サービス
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl sm:text-3xl font-bold text-blue-600">
+                    ¥<%= number_with_delimiter((@subscription.amount || 0).to_i) %>
+                    <span class="text-sm text-gray-600">/<%= @subscription.billing_cycle == 'monthly' ? '月' : @subscription.billing_cycle == 'yearly' ? '年' : 'その他' %></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ステータス -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ステータス</label>
+                <div class="p-3 bg-white/50 rounded-lg">
+                  <% case @subscription.status %>
+                  <% when 'active' %>
+                    <span class="px-3 py-2 rounded-full text-sm font-bold bg-green-500 text-white">アクティブ</span>
+                  <% when 'paused' %>
+                    <span class="px-3 py-2 rounded-full text-sm font-bold bg-orange-400 text-white">一時停止</span>
+                  <% when 'cancelled' %>
+                    <span class="px-3 py-2 rounded-full text-sm font-bold bg-red-500 text-white">キャンセル</span>
+                  <% else %>
+                    <span class="px-3 py-2 rounded-full text-sm font-bold bg-gray-400 text-white">不明</span>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- 次回課金日 -->
+              <% if @subscription.next_billing_date.present? %>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">次回課金日</label>
+                  <div class="p-3 bg-white/50 rounded-lg">
+                    <div class="flex items-center">
+                      <i class="fas fa-calendar-check text-gray-500 mr-3"></i>
+                      <% if @subscription.next_billing_date <= Date.current + 3.days %>
+                        <span class="text-red-600 font-semibold"><%= @subscription.next_billing_date.strftime('%Y年%m月%d日') %> (間近)</span>
+                      <% elsif @subscription.next_billing_date <= Date.current + 7.days %>
+                        <span class="text-orange-600 font-semibold"><%= @subscription.next_billing_date.strftime('%Y年%m月%d日') %></span>
+                      <% else %>
+                        <span class="text-gray-800"><%= @subscription.next_billing_date.strftime('%Y年%m月%d日') %></span>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- サービス開始日 -->
+              <% if @subscription.start_date.present? %>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">サービス開始日</label>
+                  <div class="p-3 bg-white/50 rounded-lg">
+                    <div class="flex items-center">
+                      <i class="fas fa-play-circle text-gray-500 mr-3"></i>
+                      <span class="text-gray-800"><%= @subscription.start_date.strftime('%Y年%m月%d日') %></span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- その他の情報 -->
+              <% if @subscription.additional_info.present? %>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">その他の情報</label>
+                  <div class="p-3 bg-white/50 rounded-lg">
+                    <p class="text-gray-800 leading-relaxed"><%= simple_format(@subscription.additional_info) %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- サイドバー情報 -->
+        <div class="space-y-4 sm:space-y-6">
+          
+          <!-- アクション -->
+          <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+            <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center">
+              <i class="fas fa-tools mr-2"></i>
+              アクション
+            </h3>
+            <div class="space-y-3">
+              <%= link_to edit_subscription_path(@subscription), 
+                          class: "w-full bg-blue-500 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors text-center text-sm font-medium flex items-center justify-center" do %>
+                <i class="fas fa-edit mr-2"></i>編集
+              <% end %>
+              <%= link_to subscription_path(@subscription), 
+                          method: :delete,
+                          class: "w-full bg-red-500 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-red-600 transition-colors text-center text-sm font-medium flex items-center justify-center",
+                          data: { 
+                            confirm: "このサブスクリプションを削除しますか？この操作は取り消せません。",
+                            "turbo-method": :delete 
+                          } do %>
+                <i class="fas fa-trash mr-2"></i>削除
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 年間コスト予測 -->
+          <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+            <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center">
+              <i class="fas fa-chart-line mr-2"></i>
+              コスト予測
+            </h3>
+            <div class="space-y-3 text-sm">
+              <% if @subscription.billing_cycle == 'monthly' %>
+                <div class="text-center p-3 bg-white/50 rounded-lg">
+                  <div class="text-sm text-gray-600 mb-1">年間コスト</div>
+                  <div class="text-lg font-bold text-purple-600">
+                    ¥<%= number_with_delimiter((@subscription.amount || 0) * 12) %>
+                  </div>
+                </div>
+              <% elsif @subscription.billing_cycle == 'yearly' %>
+                <div class="text-center p-3 bg-white/50 rounded-lg">
+                  <div class="text-sm text-gray-600 mb-1">月割りコスト</div>
+                  <div class="text-lg font-bold text-purple-600">
+                    ¥<%= number_with_delimiter(((@subscription.amount || 0) / 12).round) %>/月
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- 作成・更新日時 -->
+          <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+            <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center">
+              <i class="fas fa-clock mr-2"></i>
+              履歴
+            </h3>
+            <div class="space-y-3 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-600">作成日時:</span>
+                <span class="text-gray-800"><%= @subscription.created_at.strftime('%Y/%m/%d %H:%M') %></span>
+              </div>
+              <% if @subscription.created_at != @subscription.updated_at %>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">更新日時:</span>
+                  <span class="text-gray-800"><%= @subscription.updated_at.strftime('%Y/%m/%d %H:%M') %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

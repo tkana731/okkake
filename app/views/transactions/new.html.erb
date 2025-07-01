@@ -1,0 +1,270 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 lg:ml-64">
+  <!-- モバイル用ページヘッダー -->
+  <div class="lg:hidden bg-white/95 backdrop-blur-lg border-b border-white/30 p-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1 class="text-lg font-bold text-blue-600">➕ 新規取引</h1>
+    </div>
+    <div>
+      <%= link_to transactions_path, class: "bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    
+    <!-- デスクトップ用ヘッダー -->
+    <div class="hidden lg:block bg-white/95 backdrop-blur-lg border border-white/30 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+            ➕ 新規取引
+          </h1>
+          <p class="text-sm sm:text-base text-gray-600">収入・支出を記録</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <%= link_to transactions_path, 
+                      class: "bg-gray-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-gray-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-arrow-left mr-1 sm:mr-2"></i>一覧に戻る
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- メインフォーム -->
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
+        
+        <%= form_with model: @transaction, local: true, class: "space-y-4 sm:space-y-6" do |form| %>
+          
+          <!-- エラーメッセージ -->
+          <% if @transaction.errors.any? %>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex">
+                <div class="text-red-400">
+                  <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    入力エラーがあります
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc list-inside space-y-1">
+                      <% @transaction.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- 取引タイプ -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              取引タイプ <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
+              <label class="cursor-pointer">
+                <%= form.radio_button :transaction_type, "expense", 
+                                      class: "sr-only peer", 
+                                      checked: true %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-red-200 bg-red-50/50 text-center peer-checked:border-red-500 peer-checked:bg-red-100 hover:bg-red-100/70 transition-colors">
+                  <i class="fas fa-minus-circle text-red-500 text-xl sm:text-2xl mb-2"></i>
+                  <div class="font-semibold text-red-700 text-sm sm:text-base">支出</div>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <%= form.radio_button :transaction_type, "income", 
+                                      class: "sr-only peer" %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-green-200 bg-green-50/50 text-center peer-checked:border-green-500 peer-checked:bg-green-100 hover:bg-green-100/70 transition-colors">
+                  <i class="fas fa-plus-circle text-green-500 text-xl sm:text-2xl mb-2"></i>
+                  <div class="font-semibold text-green-700 text-sm sm:text-base">収入</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 金額 -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              金額 <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">¥</span>
+              </div>
+              <%= form.number_field :amount, 
+                                    class: "w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                    placeholder: "0",
+                                    min: 0,
+                                    step: 1 %>
+            </div>
+          </div>
+
+          <!-- カテゴリ -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              カテゴリ <span class="text-red-500">*</span>
+            </label>
+            <%= form.select :category_id, 
+                            options_from_collection_for_select(Category.available_for_user(current_user), :id, :display_name, @transaction.category_id),
+                            { prompt: "カテゴリを選択してください" },
+                            { class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+
+          <!-- 日付 -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              取引日 <span class="text-red-500">*</span>
+            </label>
+            <%= form.date_field :transaction_date, 
+                                class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                value: @transaction.transaction_date || Date.current %>
+          </div>
+
+          <!-- 店舗名 -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              店舗・取引先
+            </label>
+            <%= form.text_field :vendor, 
+                                class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                placeholder: "例: セブン-イレブン、給与など" %>
+          </div>
+
+          <!-- メモ -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              メモ
+            </label>
+            <%= form.text_area :memo, 
+                               rows: 3,
+                               class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500 resize-none",
+                               placeholder: "取引の詳細やメモがあれば記入してください" %>
+          </div>
+
+          <!-- 満足度 (支出の場合のみ) -->
+          <div class="satisfaction-section" style="display: none;">
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              満足度
+            </label>
+            <div class="flex justify-center gap-2 sm:gap-3">
+              <% (1..5).each do |star| %>
+                <label class="cursor-pointer">
+                  <%= form.radio_button :satisfaction_rating, star, 
+                                        class: "sr-only peer" %>
+                  <i class="fas fa-star text-2xl sm:text-3xl text-gray-300 peer-checked:text-yellow-500 hover:text-yellow-400 transition-colors"></i>
+                </label>
+              <% end %>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-500 text-center mt-2">
+              この支出にどの程度満足していますか？
+            </p>
+          </div>
+
+          <!-- 送信ボタン -->
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+            <%= form.submit "取引を保存", 
+                            class: "flex-1 bg-blue-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-blue-600 transition-colors font-semibold text-sm sm:text-base" %>
+            <%= link_to "キャンセル", transactions_path, 
+                        class: "flex-1 bg-gray-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-sm sm:text-base text-center" %>
+          </div>
+
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- JavaScript for dynamic form behavior -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const expenseRadio = document.querySelector('input[value="expense"]');
+  const incomeRadio = document.querySelector('input[value="income"]');
+  const satisfactionSection = document.querySelector('.satisfaction-section');
+  
+  function toggleSatisfactionSection() {
+    if (expenseRadio.checked) {
+      satisfactionSection.style.display = 'block';
+    } else {
+      satisfactionSection.style.display = 'none';
+    }
+  }
+  
+  expenseRadio.addEventListener('change', toggleSatisfactionSection);
+  incomeRadio.addEventListener('change', toggleSatisfactionSection);
+  
+  // 初期状態を設定
+  toggleSatisfactionSection();
+  
+  // 星評価のインタラクティブ機能
+  const starLabels = document.querySelectorAll('.satisfaction-section label');
+  const starIcons = document.querySelectorAll('.satisfaction-section i');
+  
+  starLabels.forEach((label, index) => {
+    label.addEventListener('mouseenter', function() {
+      for (let i = 0; i <= index; i++) {
+        starIcons[i].classList.remove('text-gray-300');
+        starIcons[i].classList.add('text-yellow-400');
+      }
+      for (let i = index + 1; i < starIcons.length; i++) {
+        starIcons[i].classList.remove('text-yellow-400');
+        starIcons[i].classList.add('text-gray-300');
+      }
+    });
+    
+    label.addEventListener('click', function() {
+      for (let i = 0; i <= index; i++) {
+        starIcons[i].classList.remove('text-gray-300', 'text-yellow-400');
+        starIcons[i].classList.add('text-yellow-500');
+      }
+      for (let i = index + 1; i < starIcons.length; i++) {
+        starIcons[i].classList.remove('text-yellow-500', 'text-yellow-400');
+        starIcons[i].classList.add('text-gray-300');
+      }
+    });
+  });
+  
+  document.querySelector('.satisfaction-section').addEventListener('mouseleave', function() {
+    const checkedRadio = document.querySelector('input[name="transaction[satisfaction_rating]"]:checked');
+    if (checkedRadio) {
+      const checkedIndex = parseInt(checkedRadio.value) - 1;
+      starIcons.forEach((icon, index) => {
+        if (index <= checkedIndex) {
+          icon.classList.remove('text-gray-300', 'text-yellow-400');
+          icon.classList.add('text-yellow-500');
+        } else {
+          icon.classList.remove('text-yellow-500', 'text-yellow-400');
+          icon.classList.add('text-gray-300');
+        }
+      });
+    } else {
+      starIcons.forEach(icon => {
+        icon.classList.remove('text-yellow-500', 'text-yellow-400');
+        icon.classList.add('text-gray-300');
+      });
+    }
+  });
+});
+</script>
+
+<!-- レスポンシブ用のカスタムスタイル -->
+<style>
+  /* スモールデバイス用の調整 */
+  @media (max-width: 640px) {
+    .grid-cols-2 > label > div {
+      min-height: 80px;
+    }
+  }
+  
+  /* 超ワイドスクリーン用の調整 */
+  @media (min-width: 1536px) {
+    .w-full {
+      max-width: 1536px;
+      margin: 0 auto;
+    }
+  }
+</style>

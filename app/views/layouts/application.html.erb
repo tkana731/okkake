@@ -18,13 +18,99 @@
     <link rel="apple-touch-icon" href="/icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="<%= user_signed_in? ? 'pb-16 lg:pb-0' : '' %>">
+    <!-- メインコンテンツ -->
+    <main class="min-h-screen">
       <%= yield %>
     </main>
+    
+    <!-- モバイル用下部ナビゲーション -->
+    <% if user_signed_in? %>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-200 z-50 lg:hidden">
+      <div class="flex justify-around items-center h-16">
+        <%= link_to root_path, class: "flex flex-col items-center justify-center w-full h-full text-xs #{current_page?(root_path) ? 'text-blue-600' : 'text-gray-600'} hover:text-blue-600 transition-colors" do %>
+          <i class="fas fa-home text-lg mb-1"></i>
+          <span>ホーム</span>
+        <% end %>
+        
+        <%= link_to transactions_path, class: "flex flex-col items-center justify-center w-full h-full text-xs #{current_page?(transactions_path) ? 'text-blue-600' : 'text-gray-600'} hover:text-blue-600 transition-colors" do %>
+          <i class="fas fa-credit-card text-lg mb-1"></i>
+          <span>取引</span>
+        <% end %>
+        
+        <%= link_to reservations_path, class: "flex flex-col items-center justify-center w-full h-full text-xs #{current_page?(reservations_path) ? 'text-blue-600' : 'text-gray-600'} hover:text-blue-600 transition-colors" do %>
+          <i class="fas fa-calendar-check text-lg mb-1"></i>
+          <span>予約</span>
+        <% end %>
+        
+        <%= link_to subscriptions_path, class: "flex flex-col items-center justify-center w-full h-full text-xs #{current_page?(subscriptions_path) ? 'text-blue-600' : 'text-gray-600'} hover:text-blue-600 transition-colors" do %>
+          <i class="fas fa-sync-alt text-lg mb-1"></i>
+          <span>サブスク</span>
+        <% end %>
+        
+        <%= link_to settings_path, class: "flex flex-col items-center justify-center w-full h-full text-xs #{current_page?(settings_path) ? 'text-blue-600' : 'text-gray-600'} hover:text-blue-600 transition-colors" do %>
+          <i class="fas fa-cog text-lg mb-1"></i>
+          <span>設定</span>
+        <% end %>
+      </div>
+    </nav>
+    <% end %>
+    
+    <!-- デスクトップ用サイドナビゲーション -->
+    <% if user_signed_in? %>
+    <nav class="hidden lg:block fixed top-0 left-0 h-full w-64 bg-white/95 backdrop-blur-lg border-r border-gray-200 z-50">
+      <div class="p-6">
+        <div class="text-center mb-8">
+          <h1 class="text-2xl font-bold text-blue-600 mb-2"><i class="fas fa-star"></i> OKKAKE</h1>
+          <p class="text-sm text-gray-600">推し活向け家計簿</p>
+        </div>
+        
+        <div class="space-y-2">
+          <%= link_to root_path, class: "flex items-center w-full px-4 py-3 text-left rounded-lg #{current_page?(root_path) ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors" do %>
+            <i class="fas fa-home w-5 text-center mr-3"></i>
+            <span>ダッシュボード</span>
+          <% end %>
+          
+          <%= link_to transactions_path, class: "flex items-center w-full px-4 py-3 text-left rounded-lg #{current_page?(transactions_path) ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors" do %>
+            <i class="fas fa-credit-card w-5 text-center mr-3"></i>
+            <span>取引管理</span>
+          <% end %>
+          
+          <%= link_to reservations_path, class: "flex items-center w-full px-4 py-3 text-left rounded-lg #{current_page?(reservations_path) ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors" do %>
+            <i class="fas fa-calendar-check w-5 text-center mr-3"></i>
+            <span>予約管理</span>
+          <% end %>
+          
+          <%= link_to subscriptions_path, class: "flex items-center w-full px-4 py-3 text-left rounded-lg #{current_page?(subscriptions_path) ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors" do %>
+            <i class="fas fa-sync-alt w-5 text-center mr-3"></i>
+            <span>サブスク管理</span>
+          <% end %>
+          
+          <%= link_to settings_path, class: "flex items-center w-full px-4 py-3 text-left rounded-lg #{current_page?(settings_path) ? 'bg-blue-100 text-blue-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors" do %>
+            <i class="fas fa-cog w-5 text-center mr-3"></i>
+            <span>設定</span>
+          <% end %>
+        </div>
+        
+        <div class="mt-8 pt-8 border-t border-gray-200">
+          <div class="text-sm text-gray-600 mb-4">
+            ようこそ、<%= current_user&.display_name || 'ゲスト' %>さん
+          </div>
+          <%= link_to destroy_user_session_path, method: :delete, 
+                      class: "flex items-center w-full px-4 py-3 text-left rounded-lg text-gray-700 hover:bg-gray-100 transition-colors",
+                      data: { "turbo-method": :delete } do %>
+            <i class="fas fa-sign-out-alt w-5 text-center mr-3"></i>
+            <span>ログアウト</span>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+    <% end %>
   </body>
 </html>

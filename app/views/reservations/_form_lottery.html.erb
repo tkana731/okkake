@@ -1,0 +1,191 @@
+<!-- 抽選購入（当選確定後購入）用フォーム -->
+<%= form_with model: @reservation, local: true, class: "space-y-4 sm:space-y-6" do |form| %>
+  
+  <%= form.hidden_field :reservation_type, value: 'lottery' %>
+  
+  <!-- エラーメッセージ -->
+  <% if @reservation.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="text-red-400">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            入力エラーがあります
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc list-inside space-y-1">
+              <% @reservation.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- イベント名・メモ -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      イベント名・公演名 <span class="text-red-500">*</span>
+    </label>
+    <%= form.text_field :memo, 
+                        class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                        placeholder: "例: ○○ライブツアー 東京公演 1日目" %>
+  </div>
+
+  <!-- カテゴリ -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      カテゴリ <span class="text-red-500">*</span>
+    </label>
+    <%= form.select :category_id,
+                    options_for_select(@categories.pluck(:name, :id), @reservation.category_id),
+                    { prompt: "カテゴリを選択" },
+                    class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" %>
+  </div>
+
+  <!-- チケット金額 -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      チケット金額（1枚あたり） <span class="text-red-500">*</span>
+    </label>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="text-gray-500 text-lg">¥</span>
+      </div>
+      <%= form.number_field :total_amount, 
+                            class: "w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                            placeholder: "0",
+                            min: 0,
+                            step: 1 %>
+    </div>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+      手数料込みの金額を入力してください
+    </p>
+  </div>
+
+  <!-- 申込手数料（先払い） -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      申込手数料（既支払い）
+    </label>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="text-gray-500 text-lg">¥</span>
+      </div>
+      <%= form.number_field :paid_amount, 
+                            class: "w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                            placeholder: "0",
+                            min: 0,
+                            step: 1,
+                            value: @reservation.paid_amount || 0 %>
+    </div>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+      抽選申込時に支払った手数料など
+    </p>
+  </div>
+
+  <!-- 当選時支払い予定額 -->
+  <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+    <div class="flex justify-between items-center">
+      <span class="text-sm sm:text-base font-medium text-purple-700">当選時の支払い予定額</span>
+      <span id="remaining-amount-display" class="text-lg sm:text-xl font-bold text-purple-700">¥0</span>
+    </div>
+  </div>
+
+
+  <!-- 抽選結果発表日 -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      抽選結果発表日 <span class="text-red-500">*</span>
+    </label>
+    <%= form.date_field :due_date, 
+                        class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" %>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+      当選時は支払い期限として使用されます
+    </p>
+  </div>
+
+  <!-- ステータス -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      ステータス <span class="text-red-500">*</span>
+    </label>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "pending", 
+                              class: "sr-only peer", 
+                              checked: @reservation.new_record? || @reservation.pending? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-purple-200 bg-purple-50/50 text-center peer-checked:border-purple-500 peer-checked:bg-purple-100 hover:bg-purple-100/70 transition-colors">
+          <i class="fas fa-dice text-purple-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-purple-700 text-xs sm:text-sm">抽選中</div>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "partial_paid", 
+                              class: "sr-only peer",
+                              checked: @reservation.partial_paid? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-green-200 bg-green-50/50 text-center peer-checked:border-green-500 peer-checked:bg-green-100 hover:bg-green-100/70 transition-colors">
+          <i class="fas fa-trophy text-green-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-green-700 text-xs sm:text-sm">当選</div>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "paid", 
+                              class: "sr-only peer",
+                              checked: @reservation.paid? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-blue-200 bg-blue-50/50 text-center peer-checked:border-blue-500 peer-checked:bg-blue-100 hover:bg-blue-100/70 transition-colors">
+          <i class="fas fa-check-circle text-blue-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-blue-700 text-xs sm:text-sm">購入済</div>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "cancelled", 
+                              class: "sr-only peer",
+                              checked: @reservation.cancelled? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-gray-200 bg-gray-50/50 text-center peer-checked:border-gray-500 peer-checked:bg-gray-100 hover:bg-gray-100/70 transition-colors">
+          <i class="fas fa-times-circle text-gray-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-gray-700 text-xs sm:text-sm">落選</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+
+  <!-- 送信ボタン -->
+  <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+    <%= form.submit @reservation.new_record? ? "抽選申込を登録" : "更新する", 
+                    class: "flex-1 bg-purple-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-purple-600 transition-colors font-semibold text-sm sm:text-base" %>
+    <%= link_to "キャンセル", reservations_path, 
+                class: "flex-1 bg-gray-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-sm sm:text-base text-center" %>
+  </div>
+
+<% end %>
+
+<!-- JavaScript for dynamic calculations -->
+<script>
+document.addEventListener('turbo:load', function() {
+  const totalAmountField = document.querySelector('#reservation_total_amount');
+  const paidAmountField = document.querySelector('#reservation_paid_amount');
+  
+  function updateRemainingAmount() {
+    const totalAmount = parseFloat(totalAmountField.value) || 0;
+    const paidAmount = parseFloat(paidAmountField.value) || 0;
+    const remainingAmount = Math.max(0, totalAmount - paidAmount);
+    
+    const remainingDisplay = document.querySelector('#remaining-amount-display');
+    if (remainingDisplay) {
+      remainingDisplay.textContent = '¥' + remainingAmount.toLocaleString();
+    }
+  }
+  
+  if (totalAmountField) totalAmountField.addEventListener('input', updateRemainingAmount);
+  if (paidAmountField) paidAmountField.addEventListener('input', updateRemainingAmount);
+  
+  // 初期計算
+  updateRemainingAmount();
+});
+</script>

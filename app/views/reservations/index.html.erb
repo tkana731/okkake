@@ -1,0 +1,331 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 lg:ml-64">
+  <!-- モバイル用ページヘッダー -->
+  <div class="lg:hidden bg-white/95 backdrop-blur-lg border-b border-white/30 p-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1 class="text-lg font-bold text-blue-600"><i class="fas fa-ticket-alt"></i> 予約管理</h1>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to new_reservation_path(type: 'confirmed'), class: "bg-blue-500 text-white py-2 px-3 rounded-lg hover:bg-blue-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-shopping-cart"></i>
+      <% end %>
+      <%= link_to new_reservation_path(type: 'lottery'), class: "bg-purple-500 text-white py-2 px-3 rounded-lg hover:bg-purple-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-dice"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    
+    <!-- デスクトップ用ヘッダー -->
+    <div class="hidden lg:block bg-white/95 backdrop-blur-lg border border-white/30 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+            <i class="fas fa-ticket-alt"></i> 予約管理
+          </h1>
+          <p class="text-sm sm:text-base text-gray-600">予約購入・抽選購入の管理</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <%= link_to new_reservation_path(type: 'confirmed'), 
+                      class: "bg-blue-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-blue-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-shopping-cart mr-1 sm:mr-2"></i>予約購入
+          <% end %>
+          <%= link_to new_reservation_path(type: 'lottery'), 
+                      class: "bg-purple-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-purple-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-dice mr-1 sm:mr-2"></i>抽選購入
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 統計カード -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-clipboard-list"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-1">
+          <%= current_user.reservations.count %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">総予約数</div>
+      </div>
+
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-clock"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-600 mb-1">
+          <%= current_user.reservations.pending.count %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">予約中</div>
+      </div>
+
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-check-circle"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 mb-1">
+          <%= current_user.reservations.paid.count %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">支払完了</div>
+      </div>
+
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-wallet"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 mb-1">
+          <span class="hidden sm:inline">¥</span><%= number_with_delimiter(current_user.reservations.sum(:total_amount).to_i) %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">総予約額</div>
+      </div>
+    </div>
+
+    <!-- フィルター -->
+    <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">ステータス</label>
+          <select class="w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option>全て</option>
+            <option>予約中</option>
+            <option>確定済み</option>
+            <option>キャンセル</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">期間</label>
+          <select class="w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option>今月</option>
+            <option>来月</option>
+            <option>今年</option>
+            <option>全期間</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">支払い状況</label>
+          <select class="w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option>全て</option>
+            <option>支払い完了</option>
+            <option>支払い残あり</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button class="w-full bg-blue-500 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
+            <i class="fas fa-search mr-2"></i>絞り込み
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 予約一覧 -->
+    <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <h2 class="text-lg sm:text-xl font-bold text-blue-600 mb-3 sm:mb-4 flex items-center">
+        <i class="fas fa-list mr-2 sm:mr-3"></i>
+        予約一覧
+      </h2>
+
+      <% if current_user.reservations.any? %>
+        <!-- デスクトップ用テーブル表示 -->
+        <div class="hidden lg:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="text-left py-3 px-4 font-semibold text-gray-600">予約・メモ</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">タイプ</th>
+                <th class="text-left py-3 px-4 font-semibold text-gray-600">支払期限</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">ステータス</th>
+                <th class="text-right py-3 px-4 font-semibold text-gray-600">金額</th>
+                <th class="text-right py-3 px-4 font-semibold text-gray-600">残額</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">期限状況</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% current_user.reservations.recent.each do |reservation| %>
+                <tr class="border-b border-gray-100 hover:bg-white/50 transition-colors">
+                  <td class="py-3 px-4">
+                    <div class="font-medium text-gray-800">
+                      <%= reservation.memo.present? ? reservation.memo : "予約#{reservation.id}" %>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <% if reservation.reservation_type == 'lottery' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700"><i class="fas fa-dice"></i> 抽選</span>
+                    <% else %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700"><i class="fas fa-shopping-cart"></i> 予約</span>
+                    <% end %>
+                  </td>
+                  <td class="py-3 px-4 text-sm text-gray-600">
+                    <%= reservation.due_date&.strftime('%Y/%m/%d') || '未設定' %>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <% case reservation.status %>
+                    <% when 'pending' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-400 text-black">予約中</span>
+                    <% when 'partial_paid' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-500 text-white">内金済み</span>
+                    <% when 'paid' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white">支払完了</span>
+                    <% when 'cancelled' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white">キャンセル</span>
+                    <% when 'overdue' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-600 text-white">期限切れ</span>
+                    <% else %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-400 text-white">不明</span>
+                    <% end %>
+                  </td>
+                  <td class="py-3 px-4 text-right font-bold text-blue-600">
+                    ¥<%= number_with_delimiter((reservation.total_amount || 0).to_i) %>
+                  </td>
+                  <td class="py-3 px-4 text-right font-bold text-red-600">
+                    ¥<%= number_with_delimiter((reservation.remaining_amount || 0).to_i) %>
+                  </td>
+                  <td class="py-3 px-4 text-center text-sm">
+                    <% if reservation.due_date.present? %>
+                      <% if reservation.due_date < Date.current %>
+                        <span class="text-red-600 font-semibold"><%= reservation.due_date.strftime('%m/%d') %> 期限切れ</span>
+                      <% elsif reservation.due_date <= Date.current + 7.days %>
+                        <span class="text-orange-600 font-semibold"><%= reservation.due_date.strftime('%m/%d') %> 間近</span>
+                      <% else %>
+                        <span class="text-gray-600"><%= reservation.due_date.strftime('%m/%d') %></span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-400">未設定</span>
+                    <% end %>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <div class="flex justify-center gap-2">
+                      <%= link_to edit_reservation_path(reservation), 
+                                  class: "text-blue-600 hover:text-blue-800 text-xs" do %>
+                        <i class="fas fa-edit"></i>
+                      <% end %>
+                      <%= link_to reservation_path(reservation), method: :delete, 
+                                  class: "text-red-600 hover:text-red-800 text-xs",
+                                  data: { confirm: "削除しますか？", "turbo-method": :delete } do %>
+                        <i class="fas fa-trash"></i>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- モバイル用カード表示 -->
+        <div class="lg:hidden space-y-3">
+          <% current_user.reservations.recent.each do |reservation| %>
+            <div class="bg-white/70 rounded-lg lg:rounded-xl p-3 sm:p-4 border border-blue-200/40 hover:bg-white/80 transition-colors">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-gray-800 text-sm truncate mb-1">
+                    <%= reservation.memo.present? ? reservation.memo : "予約#{reservation.id}" %>
+                  </div>
+                  <div class="text-xs text-gray-600 mb-1">
+                    支払期限: <%= reservation.due_date&.strftime('%Y/%m/%d') || '未設定' %>
+                  </div>
+                  <div class="text-xs">
+                    <% if reservation.reservation_type == 'lottery' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700"><i class="fas fa-dice"></i> 抽選</span>
+                    <% else %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700"><i class="fas fa-shopping-cart"></i> 予約</span>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="ml-3">
+                  <% case reservation.status %>
+                  <% when 'pending' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-400 text-black">予約中</span>
+                  <% when 'partial_paid' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-500 text-white">内金済み</span>
+                  <% when 'paid' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white">支払完了</span>
+                  <% when 'cancelled' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white">キャンセル</span>
+                  <% when 'overdue' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-600 text-white">期限切れ</span>
+                  <% else %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-400 text-white">不明</span>
+                  <% end %>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-3 mb-3 text-xs">
+                <div>
+                  <span class="text-gray-600">総額:</span>
+                  <span class="font-bold text-blue-600 ml-1">¥<%= number_with_delimiter((reservation.total_amount || 0).to_i) %></span>
+                </div>
+                <div>
+                  <span class="text-gray-600">残額:</span>
+                  <span class="font-bold text-red-600 ml-1">¥<%= number_with_delimiter((reservation.remaining_amount || 0).to_i) %></span>
+                </div>
+              </div>
+              
+              <% if reservation.due_date.present? %>
+                <div class="text-xs mb-3">
+                  <span class="text-gray-600">支払期限:</span>
+                  <% if reservation.due_date < Date.current %>
+                    <span class="text-red-600 font-semibold ml-1"><%= reservation.due_date.strftime('%Y/%m/%d') %> 期限切れ</span>
+                  <% elsif reservation.due_date <= Date.current + 7.days %>
+                    <span class="text-orange-600 font-semibold ml-1"><%= reservation.due_date.strftime('%Y/%m/%d') %> 間近</span>
+                  <% else %>
+                    <span class="text-gray-800 ml-1"><%= reservation.due_date.strftime('%Y/%m/%d') %></span>
+                  <% end %>
+                </div>
+              <% end %>
+              
+              <div class="flex justify-end gap-3 pt-2 border-t border-gray-200">
+                <%= link_to edit_reservation_path(reservation), 
+                            class: "text-blue-600 hover:text-blue-800 text-xs" do %>
+                  <i class="fas fa-edit mr-1"></i>編集
+                <% end %>
+                <%= link_to reservation_path(reservation), method: :delete, 
+                            class: "text-red-600 hover:text-red-800 text-xs",
+                            data: { confirm: "削除しますか？", "turbo-method": :delete } do %>
+                  <i class="fas fa-trash mr-1"></i>削除
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+      <% else %>
+        <div class="text-center py-8 sm:py-12">
+          <div class="text-3xl sm:text-4xl lg:text-5xl mb-4"><i class="fas fa-ticket-alt"></i></div>
+          <p class="text-gray-500 mb-4 text-sm sm:text-base">予約がありません</p>
+          <p class="text-xs sm:text-sm text-gray-400 mb-6">最初のチケット予約を登録してみましょう</p>
+          <%= link_to new_reservation_path, 
+                      class: "bg-green-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base font-medium" do %>
+            <i class="fas fa-plus mr-2"></i>最初の予約を追加
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+<!-- レスポンシブ用のカスタムスタイル -->
+<style>
+  /* スモールデバイス用の調整 */
+  @media (max-width: 640px) {
+    .grid-cols-2 > div {
+      min-height: 120px;
+    }
+  }
+  
+  /* タブレット用の調整 */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .lg\:grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* デスクトップ用の調整 */
+  @media (min-width: 1280px) {
+    .lg\:grid-cols-4 > div {
+      min-height: 150px;
+    }
+  }
+  
+  /* 超ワイドスクリーン用の調整 */
+  @media (min-width: 1536px) {
+    .w-full {
+      max-width: 1536px;
+      margin: 0 auto;
+    }
+  }
+</style>

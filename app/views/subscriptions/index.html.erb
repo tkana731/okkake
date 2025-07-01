@@ -1,0 +1,304 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 lg:ml-64">
+  <!-- モバイル用ページヘッダー -->
+  <div class="lg:hidden bg-white/95 backdrop-blur-lg border-b border-white/30 p-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1 class="text-lg font-bold text-blue-600"><i class="fas fa-sync-alt"></i> サブスク管理</h1>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to new_subscription_path, class: "bg-green-500 text-white py-2 px-3 rounded-lg hover:bg-green-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-plus"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    
+    <!-- デスクトップ用ヘッダー -->
+    <div class="hidden lg:block bg-white/95 backdrop-blur-lg border border-white/30 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+            <i class="fas fa-sync-alt"></i> サブスクリプション管理
+          </h1>
+          <p class="text-sm sm:text-base text-gray-600">定期支払いサービスの管理</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <%= link_to new_subscription_path, 
+                      class: "bg-green-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-green-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-plus mr-1 sm:mr-2"></i>新規サブスク
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 統計カード -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-clipboard-list"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 mb-1">
+          <%= current_user.subscriptions.count %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">総サブスク数</div>
+      </div>
+
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-check-circle"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-green-600 mb-1">
+          <%= current_user.subscriptions.where(status: 'active').count %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">アクティブ</div>
+      </div>
+
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-pause-circle"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-orange-600 mb-1">
+          <%= current_user.subscriptions.where(status: 'paused').count %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">一時停止</div>
+      </div>
+
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-3 sm:p-4 lg:p-6 text-center shadow-lg hover:shadow-xl transition-shadow">
+        <div class="text-xl sm:text-2xl lg:text-3xl mb-2 lg:mb-3"><i class="fas fa-wallet"></i></div>
+        <div class="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600 mb-1">
+          <span class="hidden sm:inline">¥</span><%= number_with_delimiter(current_user.monthly_subscription_total.to_i) %>
+        </div>
+        <div class="text-xs sm:text-sm lg:text-base text-gray-600">月額合計</div>
+      </div>
+    </div>
+
+    <!-- フィルター -->
+    <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">ステータス</label>
+          <select class="w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option>全て</option>
+            <option>アクティブ</option>
+            <option>一時停止</option>
+            <option>キャンセル</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">請求サイクル</label>
+          <select class="w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option>全て</option>
+            <option>月額</option>
+            <option>年額</option>
+            <option>その他</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">金額範囲</label>
+          <select class="w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
+            <option>全て</option>
+            <option>500円未満</option>
+            <option>500-1000円</option>
+            <option>1000円以上</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button class="w-full bg-blue-500 text-white py-2 sm:py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium">
+            <i class="fas fa-search mr-2"></i>絞り込み
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- サブスクリプション一覧 -->
+    <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 shadow-lg">
+      <h2 class="text-lg sm:text-xl font-bold text-blue-600 mb-3 sm:mb-4 flex items-center">
+        <i class="fas fa-list mr-2 sm:mr-3"></i>
+        サブスクリプション一覧
+      </h2>
+
+      <% if current_user.subscriptions.any? %>
+        <!-- デスクトップ用テーブル表示 -->
+        <div class="hidden lg:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="text-left py-3 px-4 font-semibold text-gray-600">サービス名</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">ステータス</th>
+                <th class="text-right py-3 px-4 font-semibold text-gray-600">金額</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">請求サイクル</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">次回請求</th>
+                <th class="text-center py-3 px-4 font-semibold text-gray-600">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% current_user.subscriptions.recent.each do |subscription| %>
+                <tr class="border-b border-gray-100 hover:bg-white/50 transition-colors">
+                  <td class="py-3 px-4">
+                    <div class="font-medium text-gray-800">
+                      <%= subscription.memo.present? ? subscription.memo : "サブスク#{subscription.id}" %>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <% case subscription.status %>
+                    <% when 'active' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white">アクティブ</span>
+                    <% when 'paused' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-orange-400 text-white">一時停止</span>
+                    <% when 'cancelled' %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white">キャンセル</span>
+                    <% else %>
+                      <span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-400 text-white">不明</span>
+                    <% end %>
+                  </td>
+                  <td class="py-3 px-4 text-right font-bold text-blue-600">
+                    ¥<%= number_with_delimiter((subscription.amount || 0).to_i) %>
+                  </td>
+                  <td class="py-3 px-4 text-center text-sm">
+                    <% case subscription.billing_cycle %>
+                    <% when 'monthly' %>
+                      <span class="text-blue-600">月額</span>
+                    <% when 'yearly' %>
+                      <span class="text-purple-600">年額</span>
+                    <% else %>
+                      <span class="text-gray-600">その他</span>
+                    <% end %>
+                  </td>
+                  <td class="py-3 px-4 text-center text-sm">
+                    <% if subscription.next_billing_date.present? %>
+                      <% if subscription.next_billing_date <= Date.current + 3.days %>
+                        <span class="text-red-600 font-semibold"><%= subscription.next_billing_date.strftime('%m/%d') %> 間近</span>
+                      <% elsif subscription.next_billing_date <= Date.current + 7.days %>
+                        <span class="text-orange-600 font-semibold"><%= subscription.next_billing_date.strftime('%m/%d') %></span>
+                      <% else %>
+                        <span class="text-gray-600"><%= subscription.next_billing_date.strftime('%m/%d') %></span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-400">未設定</span>
+                    <% end %>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <div class="flex justify-center gap-2">
+                      <%= link_to edit_subscription_path(subscription), 
+                                  class: "text-blue-600 hover:text-blue-800 text-xs" do %>
+                        <i class="fas fa-edit"></i>
+                      <% end %>
+                      <%= link_to subscription_path(subscription), method: :delete, 
+                                  class: "text-red-600 hover:text-red-800 text-xs",
+                                  data: { confirm: "削除しますか？", "turbo-method": :delete } do %>
+                        <i class="fas fa-trash"></i>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- モバイル用カード表示 -->
+        <div class="lg:hidden space-y-3">
+          <% current_user.subscriptions.recent.each do |subscription| %>
+            <div class="bg-white/70 rounded-lg lg:rounded-xl p-3 sm:p-4 border border-blue-200/40 hover:bg-white/80 transition-colors">
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-gray-800 text-sm truncate mb-1">
+                    <%= subscription.memo.present? ? subscription.memo : "サブスク#{subscription.id}" %>
+                  </div>
+                  <div class="text-xs text-gray-600">
+                    <% case subscription.billing_cycle %>
+                    <% when 'monthly' %>
+                      月額サービス
+                    <% when 'yearly' %>
+                      年額サービス
+                    <% else %>
+                      その他のサービス
+                    <% end %>
+                  </div>
+                </div>
+                <div class="ml-3 flex flex-col items-end">
+                  <% case subscription.status %>
+                  <% when 'active' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white mb-1">アクティブ</span>
+                  <% when 'paused' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-orange-400 text-white mb-1">一時停止</span>
+                  <% when 'cancelled' %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white mb-1">キャンセル</span>
+                  <% else %>
+                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-gray-400 text-white mb-1">不明</span>
+                  <% end %>
+                  <div class="font-bold text-blue-600 text-sm">
+                    ¥<%= number_with_delimiter((subscription.amount || 0).to_i) %>
+                  </div>
+                </div>
+              </div>
+              
+              <% if subscription.next_billing_date.present? %>
+                <div class="text-xs mb-3">
+                  <span class="text-gray-600">次回請求:</span>
+                  <% if subscription.next_billing_date <= Date.current + 3.days %>
+                    <span class="text-red-600 font-semibold ml-1"><%= subscription.next_billing_date.strftime('%Y/%m/%d') %> 間近</span>
+                  <% elsif subscription.next_billing_date <= Date.current + 7.days %>
+                    <span class="text-orange-600 font-semibold ml-1"><%= subscription.next_billing_date.strftime('%Y/%m/%d') %></span>
+                  <% else %>
+                    <span class="text-gray-800 ml-1"><%= subscription.next_billing_date.strftime('%Y/%m/%d') %></span>
+                  <% end %>
+                </div>
+              <% end %>
+              
+              <div class="flex justify-end gap-3 pt-2 border-t border-gray-200">
+                <%= link_to edit_subscription_path(subscription), 
+                            class: "text-blue-600 hover:text-blue-800 text-xs" do %>
+                  <i class="fas fa-edit mr-1"></i>編集
+                <% end %>
+                <%= link_to subscription_path(subscription), method: :delete, 
+                            class: "text-red-600 hover:text-red-800 text-xs",
+                            data: { confirm: "削除しますか？", "turbo-method": :delete } do %>
+                  <i class="fas fa-trash mr-1"></i>削除
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+      <% else %>
+        <div class="text-center py-8 sm:py-12">
+          <div class="text-3xl sm:text-4xl lg:text-5xl mb-4">🔄</div>
+          <p class="text-gray-500 mb-4 text-sm sm:text-base">サブスクリプションがありません</p>
+          <p class="text-xs sm:text-sm text-gray-400 mb-6">最初の定期支払いサービスを登録してみましょう</p>
+          <%= link_to new_subscription_path, 
+                      class: "bg-green-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base font-medium" do %>
+            <i class="fas fa-plus mr-2"></i>最初のサブスクを追加
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+<!-- レスポンシブ用のカスタムスタイル -->
+<style>
+  /* スモールデバイス用の調整 */
+  @media (max-width: 640px) {
+    .grid-cols-2 > div {
+      min-height: 120px;
+    }
+  }
+  
+  /* タブレット用の調整 */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .lg\:grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  /* デスクトップ用の調整 */
+  @media (min-width: 1280px) {
+    .lg\:grid-cols-4 > div {
+      min-height: 150px;
+    }
+  }
+  
+  /* 超ワイドスクリーン用の調整 */
+  @media (min-width: 1536px) {
+    .w-full {
+      max-width: 1536px;
+      margin: 0 auto;
+    }
+  }
+</style>

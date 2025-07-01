@@ -1,0 +1,187 @@
+<!-- 予約購入（購入確定）用フォーム -->
+<%= form_with model: @reservation, local: true, class: "space-y-4 sm:space-y-6" do |form| %>
+  
+  <%= form.hidden_field :reservation_type, value: 'confirmed' %>
+  
+  <!-- エラーメッセージ -->
+  <% if @reservation.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="flex">
+        <div class="text-red-400">
+          <i class="fas fa-exclamation-circle"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            入力エラーがあります
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc list-inside space-y-1">
+              <% @reservation.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- 商品名・メモ -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      商品名・メモ <span class="text-red-500">*</span>
+    </label>
+    <%= form.text_field :memo, 
+                        class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                        placeholder: "例: 限定グッズ、Blu-ray BOX、フィギュア" %>
+  </div>
+
+  <!-- カテゴリ -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      カテゴリ <span class="text-red-500">*</span>
+    </label>
+    <%= form.select :category_id,
+                    options_for_select(@categories.pluck(:name, :id), @reservation.category_id),
+                    { prompt: "カテゴリを選択" },
+                    class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" %>
+  </div>
+
+  <!-- 総金額 -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      総金額 <span class="text-red-500">*</span>
+    </label>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="text-gray-500 text-lg">¥</span>
+      </div>
+      <%= form.number_field :total_amount, 
+                            class: "w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                            placeholder: "0",
+                            min: 0,
+                            step: 1 %>
+    </div>
+  </div>
+
+  <!-- 既支払い金額 -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      既支払い金額
+    </label>
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <span class="text-gray-500 text-lg">¥</span>
+      </div>
+      <%= form.number_field :paid_amount, 
+                            class: "w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                            placeholder: "0",
+                            min: 0,
+                            step: 1,
+                            value: @reservation.paid_amount || 0 %>
+    </div>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+      既に支払った金額（予約金・内金など）
+    </p>
+  </div>
+
+  <!-- 残額表示 -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex justify-between items-center">
+      <span class="text-sm sm:text-base font-medium text-blue-700">残りの支払い金額</span>
+      <span id="remaining-amount-display" class="text-lg sm:text-xl font-bold text-blue-700">¥0</span>
+    </div>
+  </div>
+
+
+  <!-- 支払い期限 -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      支払い期限 <span class="text-red-500">*</span>
+    </label>
+    <%= form.date_field :due_date, 
+                        class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" %>
+    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+      残金の支払い期限
+    </p>
+  </div>
+
+  <!-- ステータス -->
+  <div>
+    <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+      ステータス <span class="text-red-500">*</span>
+    </label>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "pending", 
+                              class: "sr-only peer", 
+                              checked: @reservation.new_record? || @reservation.pending? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-yellow-200 bg-yellow-50/50 text-center peer-checked:border-yellow-500 peer-checked:bg-yellow-100 hover:bg-yellow-100/70 transition-colors">
+          <i class="fas fa-clock text-yellow-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-yellow-700 text-sm sm:text-base">予約中</div>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "partial_paid", 
+                              class: "sr-only peer",
+                              checked: @reservation.partial_paid? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-blue-200 bg-blue-50/50 text-center peer-checked:border-blue-500 peer-checked:bg-blue-100 hover:bg-blue-100/70 transition-colors">
+          <i class="fas fa-coins text-blue-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-blue-700 text-sm sm:text-base">内金済み</div>
+        </div>
+      </label>
+      <label class="cursor-pointer">
+        <%= form.radio_button :status, "paid", 
+                              class: "sr-only peer",
+                              checked: @reservation.paid? %>
+        <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-green-200 bg-green-50/50 text-center peer-checked:border-green-500 peer-checked:bg-green-100 hover:bg-green-100/70 transition-colors">
+          <i class="fas fa-check-circle text-green-500 text-lg sm:text-xl mb-2"></i>
+          <div class="font-semibold text-green-700 text-sm sm:text-base">支払完了</div>
+        </div>
+      </label>
+    </div>
+  </div>
+
+
+  <!-- 送信ボタン -->
+  <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+    <%= form.submit @reservation.new_record? ? "予約を登録" : "更新する", 
+                    class: "flex-1 bg-blue-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-blue-600 transition-colors font-semibold text-sm sm:text-base" %>
+    <%= link_to "キャンセル", reservations_path, 
+                class: "flex-1 bg-gray-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-sm sm:text-base text-center" %>
+  </div>
+
+<% end %>
+
+<!-- JavaScript for dynamic calculations -->
+<script>
+document.addEventListener('turbo:load', function() {
+  const totalAmountField = document.querySelector('#reservation_total_amount');
+  const paidAmountField = document.querySelector('#reservation_paid_amount');
+  
+  function updateRemainingAmount() {
+    const totalAmount = parseFloat(totalAmountField.value) || 0;
+    const paidAmount = parseFloat(paidAmountField.value) || 0;
+    const remainingAmount = Math.max(0, totalAmount - paidAmount);
+    
+    const remainingDisplay = document.querySelector('#remaining-amount-display');
+    if (remainingDisplay) {
+      remainingDisplay.textContent = '¥' + remainingAmount.toLocaleString();
+      
+      if (remainingAmount === 0 && totalAmount > 0) {
+        remainingDisplay.classList.remove('text-blue-700');
+        remainingDisplay.classList.add('text-green-600');
+      } else {
+        remainingDisplay.classList.remove('text-green-600');
+        remainingDisplay.classList.add('text-blue-700');
+      }
+    }
+  }
+  
+  if (totalAmountField) totalAmountField.addEventListener('input', updateRemainingAmount);
+  if (paidAmountField) paidAmountField.addEventListener('input', updateRemainingAmount);
+  
+  // 初期計算
+  updateRemainingAmount();
+});
+</script>

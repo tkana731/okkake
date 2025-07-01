@@ -1,0 +1,250 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 lg:ml-64">
+  <!-- モバイル用ページヘッダー -->
+  <div class="lg:hidden bg-white/95 backdrop-blur-lg border-b border-white/30 p-4 flex items-center justify-between">
+    <div class="flex items-center">
+      <h1 class="text-lg font-bold text-blue-600">➕ 新規サブスク</h1>
+    </div>
+    <div>
+      <%= link_to subscriptions_path, class: "bg-gray-500 text-white py-2 px-3 rounded-lg hover:bg-gray-600 transition-colors text-xs font-medium" do %>
+        <i class="fas fa-arrow-left"></i>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="w-full min-h-screen px-2 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+    
+    <!-- デスクトップ用ヘッダー -->
+    <div class="hidden lg:block bg-white/95 backdrop-blur-lg border border-white/30 rounded-xl lg:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-2">
+            ➕ 新規サブスクリプション
+          </h1>
+          <p class="text-sm sm:text-base text-gray-600">定期支払いサービスを登録</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <%= link_to subscriptions_path, 
+                      class: "bg-gray-500 text-white py-2 sm:py-3 px-3 sm:px-4 rounded-lg hover:bg-gray-600 transition-colors text-center text-xs sm:text-sm font-medium" do %>
+            <i class="fas fa-arrow-left mr-1 sm:mr-2"></i>一覧に戻る
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- メインフォーム -->
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white/90 backdrop-blur-lg border border-white/50 rounded-xl lg:rounded-2xl p-4 sm:p-6 lg:p-8 shadow-lg">
+        
+        <%= form_with model: @subscription, local: true, class: "space-y-4 sm:space-y-6" do |form| %>
+          
+          <!-- エラーメッセージ -->
+          <% if @subscription.errors.any? %>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div class="flex">
+                <div class="text-red-400">
+                  <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    入力エラーがあります
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc list-inside space-y-1">
+                      <% @subscription.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- サービス名・メモ -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              サービス名・メモ <span class="text-red-500">*</span>
+            </label>
+            <%= form.text_field :memo, 
+                                class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                placeholder: "例: Netflix, Spotify, Adobe Creative Cloud" %>
+          </div>
+
+          <!-- カテゴリ -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              カテゴリ <span class="text-red-500">*</span>
+            </label>
+            <%= form.select :category_id,
+                            options_from_collection_for_select(@categories, :id, :name, @subscription.category_id),
+                            { prompt: 'カテゴリを選択してください' },
+                            { class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+
+          <!-- 金額 -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              金額 <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500 text-lg">¥</span>
+              </div>
+              <%= form.number_field :amount, 
+                                    class: "w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                    placeholder: "0",
+                                    min: 0,
+                                    step: 1 %>
+            </div>
+          </div>
+
+          <!-- 請求サイクル -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              請求サイクル <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <label class="cursor-pointer">
+                <%= form.radio_button :billing_cycle, "monthly", 
+                                      class: "sr-only peer", 
+                                      checked: true %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-blue-200 bg-blue-50/50 text-center peer-checked:border-blue-500 peer-checked:bg-blue-100 hover:bg-blue-100/70 transition-colors">
+                  <i class="fas fa-calendar-alt text-blue-500 text-lg sm:text-xl mb-2"></i>
+                  <div class="font-semibold text-blue-700 text-sm sm:text-base">月額</div>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <%= form.radio_button :billing_cycle, "yearly", 
+                                      class: "sr-only peer" %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-purple-200 bg-purple-50/50 text-center peer-checked:border-purple-500 peer-checked:bg-purple-100 hover:bg-purple-100/70 transition-colors">
+                  <i class="fas fa-calendar text-purple-500 text-lg sm:text-xl mb-2"></i>
+                  <div class="font-semibold text-purple-700 text-sm sm:text-base">年額</div>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <%= form.radio_button :billing_cycle, "other", 
+                                      class: "sr-only peer" %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-gray-200 bg-gray-50/50 text-center peer-checked:border-gray-500 peer-checked:bg-gray-100 hover:bg-gray-100/70 transition-colors">
+                  <i class="fas fa-question-circle text-gray-500 text-lg sm:text-xl mb-2"></i>
+                  <div class="font-semibold text-gray-700 text-sm sm:text-base">その他</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 次回請求日 -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              次回請求日
+            </label>
+            <%= form.date_field :next_billing_date, 
+                                class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                value: Date.current.next_month.beginning_of_month %>
+            <p class="text-xs sm:text-sm text-gray-500 mt-1">
+              次回の請求が発生する日付
+            </p>
+          </div>
+
+
+          <!-- ステータス -->
+          <div>
+            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
+              ステータス <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              <label class="cursor-pointer">
+                <%= form.radio_button :status, "active", 
+                                      class: "sr-only peer", 
+                                      checked: true %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-green-200 bg-green-50/50 text-center peer-checked:border-green-500 peer-checked:bg-green-100 hover:bg-green-100/70 transition-colors">
+                  <i class="fas fa-play-circle text-green-500 text-lg sm:text-xl mb-2"></i>
+                  <div class="font-semibold text-green-700 text-sm sm:text-base">アクティブ</div>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <%= form.radio_button :status, "paused", 
+                                      class: "sr-only peer" %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-orange-200 bg-orange-50/50 text-center peer-checked:border-orange-500 peer-checked:bg-orange-100 hover:bg-orange-100/70 transition-colors">
+                  <i class="fas fa-pause-circle text-orange-500 text-lg sm:text-xl mb-2"></i>
+                  <div class="font-semibold text-orange-700 text-sm sm:text-base">一時停止</div>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <%= form.radio_button :status, "cancelled", 
+                                      class: "sr-only peer" %>
+                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-red-200 bg-red-50/50 text-center peer-checked:border-red-500 peer-checked:bg-red-100 hover:bg-red-100/70 transition-colors">
+                  <i class="fas fa-stop-circle text-red-500 text-lg sm:text-xl mb-2"></i>
+                  <div class="font-semibold text-red-700 text-sm sm:text-base">キャンセル</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+
+          <!-- 送信ボタン -->
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
+            <%= form.submit "サブスクリプションを保存", 
+                            class: "flex-1 bg-blue-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-blue-600 transition-colors font-semibold text-sm sm:text-base" %>
+            <%= link_to "キャンセル", subscriptions_path, 
+                        class: "flex-1 bg-gray-500 text-white py-3 sm:py-4 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold text-sm sm:text-base text-center" %>
+          </div>
+
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- JavaScript for billing cycle calculations -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const monthlyRadio = document.querySelector('input[value="monthly"]');
+  const yearlyRadio = document.querySelector('input[value="yearly"]');
+  const nextBillingField = document.querySelector('#subscription_next_billing_date');
+  
+  function updateNextBillingDate() {
+    const today = new Date();
+    let nextBilling;
+    
+    if (monthlyRadio.checked) {
+      // 次の月の同じ日
+      nextBilling = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+    } else if (yearlyRadio.checked) {
+      // 次の年の同じ日
+      nextBilling = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+    } else {
+      // その他の場合は次の月の1日
+      nextBilling = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    }
+    
+    // ISO形式に変換（YYYY-MM-DD）
+    const isoDate = nextBilling.toISOString().split('T')[0];
+    nextBillingField.value = isoDate;
+  }
+  
+  monthlyRadio.addEventListener('change', updateNextBillingDate);
+  yearlyRadio.addEventListener('change', updateNextBillingDate);
+  
+  // 初期設定
+  updateNextBillingDate();
+});
+</script>
+
+<!-- レスポンシブ用のカスタムスタイル -->
+<style>
+  /* スモールデバイス用の調整 */
+  @media (max-width: 640px) {
+    .grid-cols-1.sm\:grid-cols-3 > label > div {
+      min-height: 80px;
+    }
+  }
+  
+  /* 超ワイドスクリーン用の調整 */
+  @media (min-width: 1536px) {
+    .w-full {
+      max-width: 1536px;
+      margin: 0 auto;
+    }
+  }
+</style>

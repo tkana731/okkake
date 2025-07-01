@@ -1,0 +1,157 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Mobile Header -->
+  <div class="lg:hidden bg-white border-b sticky top-0 z-10">
+    <div class="px-4 sm:px-6 py-4">
+      <h1 class="text-xl font-bold text-gray-900">設定</h1>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto lg:ml-64">
+    <!-- Desktop Header -->
+    <div class="hidden lg:flex lg:items-center lg:justify-between mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">設定</h1>
+    </div>
+
+    <!-- Budget Settings Section -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">月間予算設定</h2>
+      
+      <!-- Total Budget -->
+      <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-700 mb-4">今月の全体予算</h3>
+        <%= form_with url: settings_update_budget_path, method: :post, local: true, class: "flex flex-col sm:flex-row gap-4" do |f| %>
+          <%= f.hidden_field :budget, value: Date.current.beginning_of_month, name: "budget[month]" %>
+          <div class="flex-1">
+            <div class="relative">
+              <%= f.number_field :amount, 
+                  value: @total_budget.amount.to_i,
+                  name: "budget[amount]",
+                  step: 1,
+                  min: 0,
+                  placeholder: "予算金額を入力",
+                  class: "w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+              <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
+            </div>
+          </div>
+          <%= f.submit "予算を設定", class: "bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200" %>
+        <% end %>
+        
+        <% if @total_budget.persisted? && @total_budget.amount > 0 %>
+          <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm text-gray-600">使用済み</span>
+              <span class="text-sm font-medium text-gray-900">¥<%= number_with_delimiter(@total_budget.spent.to_i) %> / ¥<%= number_with_delimiter(@total_budget.amount.to_i) %></span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-<%= @total_budget.over_budget? ? 'red' : 'blue' %>-600 h-2 rounded-full" style="width: <%= [@total_budget.percentage_used, 100].min %>%"></div>
+            </div>
+            <div class="mt-2 text-sm <%= @total_budget.over_budget? ? 'text-red-600' : 'text-gray-600' %>">
+              <%= @total_budget.over_budget? ? "予算を超過しています" : "残り ¥#{number_with_delimiter(@total_budget.remaining.to_i)}" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Category Budgets -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-700 mb-4">カテゴリ別予算</h3>
+        
+        <!-- Add Category Budget Form -->
+        <%= form_with url: settings_update_budget_path, method: :post, local: true, class: "mb-6 p-4 bg-gray-50 rounded-lg" do |f| %>
+          <%= f.hidden_field :budget, value: Date.current.beginning_of_month, name: "budget[month]" %>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <%= f.select :category_id, 
+                  options_for_select(@categories.map { |c| [c.name, c.id] }),
+                  { prompt: "カテゴリを選択" },
+                  name: "budget[category_id]",
+                  class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+            </div>
+            <div>
+              <div class="relative">
+                <%= f.number_field :amount,
+                    step: 1,
+                    min: 0,
+                    placeholder: "予算金額",
+                    name: "budget[amount]",
+                    class: "w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none">円</span>
+              </div>
+            </div>
+            <div>
+              <%= f.submit "カテゴリ予算を追加", class: "w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200" %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Category Budget List -->
+        <% if @category_budgets.any? %>
+          <div class="space-y-4">
+            <% @category_budgets.each do |budget| %>
+              <div class="p-4 border border-gray-200 rounded-lg">
+                <div class="flex justify-between items-start mb-3">
+                  <h4 class="font-medium text-gray-900"><%= budget.category.name %></h4>
+                  <%= link_to "削除", delete_budget_path(budget), method: :delete, data: { confirm: "この予算設定を削除しますか？" }, class: "text-sm text-red-600 hover:text-red-700" %>
+                </div>
+                
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm text-gray-600">予算</span>
+                  <span class="text-sm font-medium text-gray-900">¥<%= number_with_delimiter(budget.amount.to_i) %></span>
+                </div>
+                
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm text-gray-600">使用済み</span>
+                  <span class="text-sm font-medium text-gray-900">¥<%= number_with_delimiter(budget.spent.to_i) %></span>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div class="bg-<%= budget.over_budget? ? 'red' : 'green' %>-600 h-2 rounded-full" style="width: <%= [budget.percentage_used, 100].min %>%"></div>
+                </div>
+                
+                <div class="text-sm <%= budget.over_budget? ? 'text-red-600' : 'text-gray-600' %>">
+                  <%= budget.over_budget? ? "予算を超過しています" : "残り ¥#{number_with_delimiter(budget.remaining.to_i)}" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-center py-8">カテゴリ別予算が設定されていません</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Category Settings Section -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">カテゴリ管理</h2>
+      
+      <div class="space-y-4">
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <div class="flex items-center">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a1.994 1.994 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-medium text-gray-900">カテゴリ設定</h3>
+              <p class="text-sm text-gray-500">基本カテゴリの確認とカスタムカテゴリの管理</p>
+            </div>
+          </div>
+          <%= link_to categories_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            管理画面へ
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Settings Sections (placeholder) -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-6">その他の設定</h2>
+      <p class="text-gray-500">今後追加予定の設定項目がここに表示されます。</p>
+    </div>
+  </div>
+</div>
