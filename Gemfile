@@ -61,6 +61,7 @@ group :development do
   gem "bullet"                 # N+1問題検出
   gem "better_errors"          # エラー画面改善
   gem "binding_of_caller"      # better_errorsで変数確認
+  gem "brakeman"               # セキュリティスキャン
 end
 
 # 認証
