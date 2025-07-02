@@ -28,10 +28,13 @@ threads_count = ENV.fetch("RAILS_MAX_THREADS", 3)
 threads threads_count, threads_count
 
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT", 3000)
-
-# Specifies the `bind` for better compatibility with Render
-bind "tcp://0.0.0.0:#{ENV.fetch("PORT", 3000)}" if ENV["RAILS_ENV"] == "production"
+# In production, we use bind instead of port
+if ENV["RAILS_ENV"] == "production"
+  # Specifies the `bind` for better compatibility with Render
+  bind "tcp://0.0.0.0:#{ENV.fetch("PORT", 3000)}"
+else
+  port ENV.fetch("PORT", 3000)
+end
 
 # Specifies the `environment` that Puma will run in.
 environment ENV.fetch("RAILS_ENV", "development")
@@ -53,7 +56,8 @@ preload_app! if ENV["RAILS_ENV"] == "production"
 plugin :tmp_restart
 
 # Run the Solid Queue supervisor inside of Puma for single-server deployments
-plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
+# Disabled for production deployment
+# plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
