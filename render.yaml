@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: okkake
+    runtime: ruby
+    plan: free # 無料プランから開始
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec rails server -b 0.0.0.0"
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Supabaseのデータベース接続URLを手動で設定
+      - key: RAILS_MASTER_KEY
+        sync: false # config/master.keyの内容を手動で設定
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_SERVE_STATIC_FILES
+        value: true
+      - key: RAILS_LOG_TO_STDOUT
+        value: true
