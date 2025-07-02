@@ -58,13 +58,17 @@
                     <%= @subscription.memo.present? ? @subscription.memo : "サブスクリプション#{@subscription.id}" %>
                   </div>
                   <div class="text-sm text-gray-600">
-                    <%= @subscription.billing_cycle == 'monthly' ? '月額' : @subscription.billing_cycle == 'yearly' ? '年額' : 'その他' %>サービス
+                    <% if @subscription.billing_cycle_type.present? %>
+                      <%= @subscription.billing_cycle_type_display %>
+                    <% else %>
+                      <%= @subscription.billing_cycle == 'monthly' ? '月額' : @subscription.billing_cycle == 'yearly' ? '年額' : 'その他' %>サービス
+                    <% end %>
                   </div>
                 </div>
                 <div class="text-right">
                   <div class="text-2xl sm:text-3xl font-bold text-blue-600">
                     ¥<%= number_with_delimiter((@subscription.amount || 0).to_i) %>
-                    <span class="text-sm text-gray-600">/<%= @subscription.billing_cycle == 'monthly' ? '月' : @subscription.billing_cycle == 'yearly' ? '年' : 'その他' %></span>
+                    <span class="text-sm text-gray-600">/<% if @subscription.billing_cycle_type.present? %><%= @subscription.billing_cycle_type_display %><% else %><%= @subscription.billing_cycle == 'monthly' ? '月' : @subscription.billing_cycle == 'yearly' ? '年' : 'その他' %><% end %></span>
                   </div>
                 </div>
               </div>
@@ -124,6 +128,43 @@
                   <label class="block text-sm font-medium text-gray-700 mb-2">その他の情報</label>
                   <div class="p-3 bg-white/50 rounded-lg">
                     <p class="text-gray-800 leading-relaxed"><%= simple_format(@subscription.additional_info) %></p>
+                  </div>
+                </div>
+              <% end %>
+              
+              <!-- 繰り返し設定詳細 -->
+              <% if @subscription.billing_cycle_type.present? %>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">繰り返し設定</label>
+                  <div class="p-3 bg-white/50 rounded-lg space-y-2">
+                    <div class="flex items-center">
+                      <i class="fas fa-sync-alt text-blue-500 mr-3"></i>
+                      <span class="text-gray-800 font-medium"><%= @subscription.billing_cycle_type_display %></span>
+                    </div>
+                    
+                    <% if @subscription.custom_interval.present? && @subscription.custom_interval > 1 %>
+                      <div class="flex items-center text-sm">
+                        <i class="fas fa-clock text-gray-400 mr-3"></i>
+                        <span class="text-gray-600">間隔: <%= @subscription.custom_interval %>回分</span>
+                      </div>
+                    <% end %>
+                    
+                    <% if @subscription.weekdays_only? %>
+                      <div class="flex items-center text-sm">
+                        <i class="fas fa-calendar-week text-orange-500 mr-3"></i>
+                        <span class="text-orange-600">平日のみ実行</span>
+                      </div>
+                    <% end %>
+                    
+                    <% unless @subscription.holiday_adjustment_none? %>
+                      <div class="flex items-center text-sm">
+                        <i class="fas fa-calendar-alt text-purple-500 mr-3"></i>
+                        <span class="text-purple-600">
+                          土日祝日調整: 
+                          <%= @subscription.holiday_adjustment_before? ? '直前の平日' : '直後の平日' %>
+                        </span>
+                      </div>
+                    <% end %>
                   </div>
                 </div>
               <% end %>

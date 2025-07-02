@@ -48,6 +48,9 @@ class SubscriptionsController < ApplicationController
   end
 
   def subscription_params
-    params.require(:subscription).permit(:memo, :amount, :billing_cycle, :next_billing_date, :status, :category_id)
+    params.require(:subscription).permit(
+      :memo, :amount, :billing_cycle, :next_billing_date, :status, :category_id,
+      :billing_cycle_type, :custom_interval, :weekdays_only, :holiday_adjustment
+    )
   end
 end

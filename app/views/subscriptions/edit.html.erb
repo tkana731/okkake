@@ -113,38 +113,100 @@
             </div>
           </div>
 
-          <!-- 請求サイクル -->
-          <div>
-            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
-              請求サイクル <span class="text-red-500">*</span>
-            </label>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <label class="cursor-pointer">
-                <%= form.radio_button :billing_cycle, "monthly", 
-                                      class: "sr-only peer" %>
-                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-blue-200 bg-blue-50/50 text-center peer-checked:border-blue-500 peer-checked:bg-blue-100 hover:bg-blue-100/70 transition-colors">
-                  <i class="fas fa-calendar-alt text-blue-500 text-lg sm:text-xl mb-2"></i>
-                  <div class="font-semibold text-blue-700 text-sm sm:text-base">月額</div>
-                </div>
+          <!-- 繰り返し設定 -->
+          <div class="bg-gray-50 rounded-lg p-4 space-y-4">
+            <h3 class="text-sm sm:text-base font-medium text-gray-700 mb-3">
+              📅 繰り返し設定 <span class="text-red-500">*</span>
+            </h3>
+            
+            <!-- 繰り返し間隔タイプ -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                繰り返し間隔
               </label>
-              <label class="cursor-pointer">
-                <%= form.radio_button :billing_cycle, "yearly", 
-                                      class: "sr-only peer" %>
-                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-purple-200 bg-purple-50/50 text-center peer-checked:border-purple-500 peer-checked:bg-purple-100 hover:bg-purple-100/70 transition-colors">
-                  <i class="fas fa-calendar text-purple-500 text-lg sm:text-xl mb-2"></i>
-                  <div class="font-semibold text-purple-700 text-sm sm:text-base">年額</div>
-                </div>
+              <%= form.select :billing_cycle_type,
+                              options_for_select([
+                                ['毎日', 'daily'],
+                                ['平日のみ', 'weekdays'],
+                                ['毎週', 'weekly'],
+                                ['2週間ごと', 'biweekly'],
+                                ['3週間ごと', 'triweekly'],
+                                ['毎月', 'monthly'],
+                                ['2ヶ月ごと', 'bimonthly'],
+                                ['3ヶ月ごと', 'trimonthly'],
+                                ['四半期ごと', 'quarterly'],
+                                ['4ヶ月ごと', 'quadrimonthly'],
+                                ['5ヶ月ごと', 'quintmonthly'],
+                                ['半年ごと', 'semi_annual'],
+                                ['毎年', 'yearly']
+                              ], @subscription.billing_cycle_type || 'monthly'),
+                              {},
+                              { class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                id: "billing_cycle_type_select" } %>
+            </div>
+            
+            <!-- カスタム間隔（条件付き表示） -->
+            <div id="custom_interval_section" class="hidden">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                間隔数
               </label>
-              <label class="cursor-pointer">
-                <%= form.radio_button :billing_cycle, "other", 
-                                      class: "sr-only peer" %>
-                <div class="w-full p-3 sm:p-4 rounded-lg border-2 border-gray-200 bg-gray-50/50 text-center peer-checked:border-gray-500 peer-checked:bg-gray-100 hover:bg-gray-100/70 transition-colors">
-                  <i class="fas fa-question-circle text-gray-500 text-lg sm:text-xl mb-2"></i>
-                  <div class="font-semibold text-gray-700 text-sm sm:text-base">その他</div>
-                </div>
+              <%= form.number_field :custom_interval,
+                                    class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500",
+                                    min: 1,
+                                    max: 12,
+                                    placeholder: "例: 2（2ヶ月ごとの場合）" %>
+              <p class="text-xs text-gray-500 mt-1">
+                月間隔の場合：1〜12の間で指定してください
+              </p>
+            </div>
+            
+            <!-- 平日のみフラグ（条件付き表示） -->
+            <div id="weekdays_only_section" class="hidden">
+              <label class="flex items-center space-x-2">
+                <%= form.check_box :weekdays_only, class: "rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+                <span class="text-sm font-medium text-gray-700">平日（月〜金）のみ繰り返す</span>
               </label>
+              <p class="text-xs text-gray-500 mt-1">
+                土日を除外して繰り返し処理を行います
+              </p>
+            </div>
+            
+            <!-- 祝日調整 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                土日祝日の調整
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <label class="cursor-pointer">
+                  <%= form.radio_button :holiday_adjustment, "none", 
+                                        class: "sr-only peer" %>
+                  <div class="w-full p-2 rounded-lg border-2 border-gray-200 bg-gray-50/50 text-center peer-checked:border-blue-500 peer-checked:bg-blue-100 hover:bg-gray-100/70 transition-colors">
+                    <div class="font-medium text-gray-700 text-xs sm:text-sm">調整なし</div>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <%= form.radio_button :holiday_adjustment, "before", 
+                                        class: "sr-only peer" %>
+                  <div class="w-full p-2 rounded-lg border-2 border-orange-200 bg-orange-50/50 text-center peer-checked:border-orange-500 peer-checked:bg-orange-100 hover:bg-orange-100/70 transition-colors">
+                    <div class="font-medium text-orange-700 text-xs sm:text-sm">直前の平日</div>
+                  </div>
+                </label>
+                <label class="cursor-pointer">
+                  <%= form.radio_button :holiday_adjustment, "after", 
+                                        class: "sr-only peer" %>
+                  <div class="w-full p-2 rounded-lg border-2 border-green-200 bg-green-50/50 text-center peer-checked:border-green-500 peer-checked:bg-green-100 hover:bg-green-100/70 transition-colors">
+                    <div class="font-medium text-green-700 text-xs sm:text-sm">直後の平日</div>
+                  </div>
+                </label>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                繰り返し日が土日祝日の場合の調整方法を選択
+              </p>
             </div>
           </div>
+          
+          <!-- 従来の請求サイクル（後方互換性のため非表示） -->
+          <%= form.hidden_field :billing_cycle, value: @subscription.billing_cycle || "monthly" %>
 
           <!-- 次回請求日 -->
           <div>
@@ -158,14 +220,6 @@
             </p>
           </div>
 
-          <!-- 開始日 -->
-          <div>
-            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
-              サービス開始日
-            </label>
-            <%= form.date_field :start_date, 
-                                class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500" %>
-          </div>
 
           <!-- ステータス -->
           <div>
@@ -200,16 +254,6 @@
             </div>
           </div>
 
-          <!-- その他の情報 -->
-          <div>
-            <label class="block text-sm sm:text-base font-medium text-gray-700 mb-2 sm:mb-3">
-              その他の情報
-            </label>
-            <%= form.text_area :additional_info, 
-                               rows: 3,
-                               class: "w-full p-2 sm:p-3 border border-gray-300 rounded-lg text-sm sm:text-base focus:ring-blue-500 focus:border-blue-500 resize-none",
-                               placeholder: "例: プラン詳細、キャンセル方法、料金変更履歴など" %>
-          </div>
 
           <!-- 送信ボタン -->
           <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
@@ -239,6 +283,38 @@
 
   </div>
 </div>
+
+<!-- JavaScript for recurring settings -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const billingCycleTypeSelect = document.getElementById('billing_cycle_type_select');
+  const customIntervalSection = document.getElementById('custom_interval_section');
+  const weekdaysOnlySection = document.getElementById('weekdays_only_section');
+  
+  function updateVisibility() {
+    const selectedType = billingCycleTypeSelect.value;
+    
+    // カスタム間隔セクションの表示制御
+    if (selectedType === 'monthly' || selectedType === 'weekly') {
+      customIntervalSection.classList.remove('hidden');
+    } else {
+      customIntervalSection.classList.add('hidden');
+    }
+    
+    // 平日のみセクションの表示制御
+    if (selectedType === 'daily' || selectedType === 'weekly') {
+      weekdaysOnlySection.classList.remove('hidden');
+    } else {
+      weekdaysOnlySection.classList.add('hidden');
+    }
+  }
+  
+  billingCycleTypeSelect.addEventListener('change', updateVisibility);
+  
+  // 初期設定
+  updateVisibility();
+});
+</script>
 
 <!-- レスポンシブ用のカスタムスタイル -->
 <style>

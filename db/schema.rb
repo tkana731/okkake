@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_01_145142) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_02_165227) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -79,6 +79,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_01_145142) do
     t.text "memo"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "billing_cycle_type", default: "monthly", null: false, comment: "繰り返し間隔タイプ（daily, weekdays, weekly, biweekly, triweekly, monthly, bimonthly, trimonthly, quarterly, semi_annual, yearly）"
+    t.integer "custom_interval", default: 1, comment: "カスタム間隔数（例：2ヶ月ごとの場合は2）"
+    t.boolean "weekdays_only", default: false, null: false, comment: "平日（月-金）のみ繰り返すかどうか"
+    t.string "holiday_adjustment", default: "none", comment: "祝日調整（none: 調整なし、before: 直前の平日、after: 直後の平日）"
     t.index ["category_id"], name: "index_subscriptions_on_category_id"
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end

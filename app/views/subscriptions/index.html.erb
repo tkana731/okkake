@@ -149,13 +149,17 @@
                     ¥<%= number_with_delimiter((subscription.amount || 0).to_i) %>
                   </td>
                   <td class="py-3 px-4 text-center text-sm">
-                    <% case subscription.billing_cycle %>
-                    <% when 'monthly' %>
-                      <span class="text-blue-600">月額</span>
-                    <% when 'yearly' %>
-                      <span class="text-purple-600">年額</span>
+                    <% if subscription.billing_cycle_type.present? %>
+                      <span class="text-blue-600 text-xs"><%= subscription.billing_cycle_type_display %></span>
                     <% else %>
-                      <span class="text-gray-600">その他</span>
+                      <% case subscription.billing_cycle %>
+                      <% when 'monthly' %>
+                        <span class="text-blue-600">月額</span>
+                      <% when 'yearly' %>
+                        <span class="text-purple-600">年額</span>
+                      <% else %>
+                        <span class="text-gray-600">その他</span>
+                      <% end %>
                     <% end %>
                   </td>
                   <td class="py-3 px-4 text-center text-sm">
@@ -200,13 +204,17 @@
                     <%= subscription.memo.present? ? subscription.memo : "サブスク#{subscription.id}" %>
                   </div>
                   <div class="text-xs text-gray-600">
-                    <% case subscription.billing_cycle %>
-                    <% when 'monthly' %>
-                      月額サービス
-                    <% when 'yearly' %>
-                      年額サービス
+                    <% if subscription.billing_cycle_type.present? %>
+                      <%= subscription.billing_cycle_type_display %>
                     <% else %>
-                      その他のサービス
+                      <% case subscription.billing_cycle %>
+                      <% when 'monthly' %>
+                        月額サービス
+                      <% when 'yearly' %>
+                        年額サービス
+                      <% else %>
+                        その他のサービス
+                      <% end %>
                     <% end %>
                   </div>
                 </div>
