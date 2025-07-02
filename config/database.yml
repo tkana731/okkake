@@ -14,3 +14,5 @@ test:
 
 production:
   <<: *default
+  # Disable prepared statements to avoid conflicts in production
+  prepared_statements: false
