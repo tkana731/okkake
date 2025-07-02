@@ -1,6 +1,6 @@
 class SubscriptionsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_subscription, only: [:show, :edit, :update, :destroy]
+  before_action :set_subscription, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @subscriptions = current_user.subscriptions.includes(:user).recent
@@ -16,9 +16,9 @@ class SubscriptionsController < ApplicationController
 
   def create
     @subscription = current_user.subscriptions.build(subscription_params)
-    
+
     if @subscription.save
-      redirect_to subscriptions_path, notice: 'サブスクリプションが作成されました。'
+      redirect_to subscriptions_path, notice: "サブスクリプションが作成されました。"
     else
       @categories = Category.all
       render :new, status: :unprocessable_entity
@@ -30,7 +30,7 @@ class SubscriptionsController < ApplicationController
 
   def update
     if @subscription.update(subscription_params)
-      redirect_to subscription_path(@subscription), notice: 'サブスクリプションが更新されました。'
+      redirect_to subscription_path(@subscription), notice: "サブスクリプションが更新されました。"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -38,7 +38,7 @@ class SubscriptionsController < ApplicationController
 
   def destroy
     @subscription.destroy!
-    redirect_to subscriptions_path, notice: 'サブスクリプションが削除されました。'
+    redirect_to subscriptions_path, notice: "サブスクリプションが削除されました。"
   end
 
   private

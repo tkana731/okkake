@@ -1,6 +1,6 @@
 class SettingsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_budget, only: [:index]
+  before_action :set_budget, only: [ :index ]
 
   def index
     @budgets = current_user.budgets.for_month(Date.current).includes(:category)
@@ -14,16 +14,16 @@ class SettingsController < ApplicationController
     @budget.amount = budget_params[:amount]
 
     if @budget.save
-      redirect_to settings_path, notice: '予算を更新しました。'
+      redirect_to settings_path, notice: "予算を更新しました。"
     else
-      redirect_to settings_path, alert: '予算の更新に失敗しました。'
+      redirect_to settings_path, alert: "予算の更新に失敗しました。"
     end
   end
 
   def delete_budget
     @budget = current_user.budgets.find(params[:id])
     @budget.destroy
-    redirect_to settings_path, notice: '予算を削除しました。'
+    redirect_to settings_path, notice: "予算を削除しました。"
   end
 
   private

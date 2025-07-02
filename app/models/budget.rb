@@ -5,7 +5,7 @@ class Budget < ApplicationRecord
   validates :amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :spent, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :month, presence: true
-  validates :user_id, uniqueness: { scope: [:month, :category_id] }
+  validates :user_id, uniqueness: { scope: [ :month, :category_id ] }
 
   scope :for_month, ->(date) { where(month: date.beginning_of_month) }
   scope :total_budget, -> { where(category_id: nil) }

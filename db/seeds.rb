@@ -217,19 +217,19 @@ puts "サンプル取引データを作成中..."
 current_date = Date.current
 30.times do |i|
   date = current_date - i.days
-  
+
   # ランダムなカテゴリを選択
   category = Category.where.not(parent_id: nil).sample
-  
+
   # 支出の作成
   if rand < 0.8 # 80%の確率で支出
     amount = case category.category_type
-             when 'oshi' then rand(1000..15000)
-             when 'life' then rand(2000..30000)
-             when 'transport' then rand(500..5000)
-             else rand(500..10000)
-             end
-    
+    when 'oshi' then rand(1000..15000)
+    when 'life' then rand(2000..30000)
+    when 'transport' then rand(500..5000)
+    else rand(500..10000)
+    end
+
     Transaction.create!(
       user: test_user,
       category: category,
@@ -237,7 +237,7 @@ current_date = Date.current
       transaction_type: 'expense',
       transaction_date: date,
       memo: "#{category.name}での支出",
-      vendor: ['Amazon', 'メルカリ', '店舗', 'オンライン'].sample,
+      vendor: [ 'Amazon', 'メルカリ', '店舗', 'オンライン' ].sample,
       satisfaction_rating: rand(3..5)
     )
   else # 20%の確率で収入
