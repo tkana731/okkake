@@ -56,10 +56,11 @@ end
 
 group :development do
   gem "web-console"
-  gem "rubocop-rails"      # コード品質チェック
-  gem "bullet"             # N+1問題検出
-  gem "better_errors"      # エラー画面改善
-  gem "binding_of_caller"  # better_errorsで変数確認
+  gem "rubocop-rails"          # コード品質チェック
+  gem "rubocop-rails-omakase"  # Railsベストプラクティス
+  gem "bullet"                 # N+1問題検出
+  gem "better_errors"          # エラー画面改善
+  gem "binding_of_caller"      # better_errorsで変数確認
 end
 
 # 認証
