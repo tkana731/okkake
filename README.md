@@ -103,3 +103,28 @@ rails assets:precompile
 - **タイムゾーン**: Asia/Tokyo
 - **ロケール**: 日本語（ja）
 - **データベース**: PostgreSQL（Supabase 接続）
+
+## デプロイ（Render）
+
+### クイックスタート
+
+1. [Render](https://render.com)でアカウント作成
+2. GitHubリポジトリを接続
+3. 環境変数を設定：
+   - `DATABASE_URL`: Supabaseから取得
+   - `RAILS_MASTER_KEY`: config/master.keyの内容
+4. デプロイ実行
+
+### 自動デプロイ設定
+
+プロジェクトには以下のRender設定ファイルが含まれています：
+
+- `render.yaml`: サービス設定
+- `bin/render-build.sh`: ビルドスクリプト
+
+GitHubにプッシュすると自動的にデプロイされます。
+
+### 注意事項
+
+- 無料プランは15分間アクセスがないとスリープ状態になります
+- 本番環境では有料プランへのアップグレードを推奨

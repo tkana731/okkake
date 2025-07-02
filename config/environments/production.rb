@@ -33,6 +33,13 @@ Rails.application.configure do
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
+  # Allow Render host
+  config.hosts << "okkake.onrender.com"
+  config.hosts << /.*\.onrender\.com/
+
+  # Disable SSL for Render (they handle it at the proxy level)
+  config.force_ssl = false
+
   # Log to STDOUT with the current request id as a default log tag.
   config.log_tags = [ :request_id ]
   config.logger   = ActiveSupport::TaggedLogging.logger(STDOUT)
@@ -47,7 +54,9 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Replace the default in-process memory cache store with a durable alternative.
-  config.cache_store = :solid_cache_store
+  # config.cache_store = :solid_cache_store
+  # Use default memory store for now
+  config.cache_store = :memory_store
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
   config.active_job.queue_adapter = :solid_queue
@@ -72,6 +81,9 @@ Rails.application.configure do
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
+
+  # Compile assets if missing (for Render)
+  config.assets.compile = true
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
