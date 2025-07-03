@@ -138,6 +138,41 @@ class Reservation < ApplicationRecord
     end
   end
 
+  # 抽選結果発表日時関連メソッド
+  def lottery_announcement_date
+    lottery_announcement_time&.to_date
+  end
+
+  def lottery_announcement_time_only
+    lottery_announcement_time&.in_time_zone("Tokyo")&.strftime("%H:%M") if lottery_announcement_time
+  end
+
+  def has_lottery_announcement_time?
+    lottery_announcement_time.present? && lottery_announcement_time_only != "00:00"
+  end
+
+  def formatted_lottery_announcement
+    return nil unless lottery_announcement_time.present?
+
+    jst_time = lottery_announcement_time.in_time_zone("Tokyo")
+    if has_lottery_announcement_time?
+      jst_time.strftime("%Y年%m月%d日 %H:%M")
+    else
+      "#{jst_time.strftime("%Y年%m月%d日")} (終日)"
+    end
+  end
+
+  def formatted_lottery_announcement_short
+    return nil unless lottery_announcement_time.present?
+
+    jst_time = lottery_announcement_time.in_time_zone("Tokyo")
+    if has_lottery_announcement_time?
+      jst_time.strftime("%m/%d %H:%M")
+    else
+      "#{jst_time.strftime("%m/%d")} (終日)"
+    end
+  end
+
   # 支払い処理
   def mark_as_paid!
     update!(status: "paid", paid_amount: total_amount)

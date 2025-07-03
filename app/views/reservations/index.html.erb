@@ -174,7 +174,16 @@
                     ¥<%= number_with_delimiter((reservation.remaining_amount || 0).to_i) %>
                   </td>
                   <td class="py-3 px-4 text-center text-sm">
-                    <% if reservation.due_date.present? %>
+                    <% if reservation.lottery? && reservation.lottery_announcement_time.present? %>
+                      <% target_date = reservation.lottery_announcement_date %>
+                      <% if target_date && target_date < Date.current %>
+                        <span class="text-red-600 font-semibold"><%= reservation.formatted_lottery_announcement_short %> 期限切れ</span>
+                      <% elsif target_date && target_date <= Date.current + 7.days %>
+                        <span class="text-orange-600 font-semibold"><%= reservation.formatted_lottery_announcement_short %> 間近</span>
+                      <% else %>
+                        <span class="text-gray-600"><%= reservation.formatted_lottery_announcement_short %></span>
+                      <% end %>
+                    <% elsif reservation.due_date.present? %>
                       <% if reservation.due_date < Date.current %>
                         <span class="text-red-600 font-semibold"><%= reservation.due_date.strftime('%m/%d') %> 期限切れ</span>
                       <% elsif reservation.due_date <= Date.current + 7.days %>
@@ -215,7 +224,12 @@
                     <%= reservation.memo.present? ? reservation.memo : "予約#{reservation.id}" %>
                   </div>
                   <div class="text-xs text-gray-600 mb-1">
-                    支払期限: <%= reservation.due_date&.strftime('%Y/%m/%d') || '未設定' %>
+                    <% if reservation.lottery? && reservation.lottery_announcement_time.present? %>
+                      <%= reservation.pending? ? "抽選発表: " : "発表日時: " %>
+                      <%= reservation.formatted_lottery_announcement %>
+                    <% else %>
+                      支払期限: <%= reservation.due_date&.strftime('%Y/%m/%d') || '未設定' %>
+                    <% end %>
                   </div>
                   <div class="text-xs">
                     <% if reservation.reservation_type == 'lottery' %>

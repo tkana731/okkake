@@ -70,7 +70,7 @@ class Subscription < ApplicationRecord
 
   def billing_cycle_type_display
     interval_text = custom_interval.present? && custom_interval > 1 ? "#{custom_interval}" : ""
-    
+
     base_text = case billing_cycle_type
     when "daily" then "毎日"
     when "weekdays" then "平日のみ"
@@ -87,21 +87,21 @@ class Subscription < ApplicationRecord
     when "yearly" then "毎年"
     else billing_cycle_type.humanize
     end
-    
+
     # 祝日調整の表示
     adjustment_text = case holiday_adjustment
     when "before" then "（土日祝日の場合は直前の平日）"
     when "after" then "（土日祝日の場合は直後の平日）"
     else ""
     end
-    
+
     "#{base_text}#{adjustment_text}"
   end
-  
+
   # 古いメソッドとの互換性
   def billing_cycle_display
     return billing_cycle_type_display if billing_cycle_type.present?
-    
+
     case billing_cycle
     when "monthly" then "月額"
     when "quarterly" then "3ヶ月"
@@ -121,15 +121,15 @@ class Subscription < ApplicationRecord
   # 月額換算（新しいbilling_cycle_typeに対応）
   def monthly_equivalent
     return 0.0 unless amount.present?
-    
+
     # 新しいbilling_cycle_typeがある場合はそちらを使用
     if billing_cycle_type.present?
       return calculate_monthly_equivalent_from_cycle_type
     end
-    
+
     # 古いbilling_cycleとの互換性
     return 0.0 unless billing_cycle.present?
-    
+
     case billing_cycle
     when "monthly" then amount.to_f
     when "quarterly" then (amount.to_f / 3)
@@ -140,12 +140,12 @@ class Subscription < ApplicationRecord
     else amount.to_f
     end
   end
-  
+
   private
-  
+
   def calculate_monthly_equivalent_from_cycle_type
     interval = custom_interval.present? ? custom_interval : 1
-    
+
     case billing_cycle_type
     when "daily"
       if weekdays_only?
@@ -179,7 +179,7 @@ class Subscription < ApplicationRecord
       amount.to_f
     end
   end
-  
+
   public
 
   def formatted_monthly_equivalent
@@ -236,15 +236,15 @@ class Subscription < ApplicationRecord
   # 次回課金日の計算（新しいbilling_cycle_typeに対応）
   def calculate_next_billing_date(from_date = next_billing_date)
     return from_date unless from_date.present?
-    
+
     # 新しいbilling_cycle_typeがある場合
     if billing_cycle_type.present?
       return calculate_next_billing_date_from_cycle_type(from_date)
     end
-    
+
     # 古いbilling_cycleとの互換性
     return from_date unless billing_cycle.present?
-    
+
     case billing_cycle
     when "daily" then from_date + 1.day
     when "weekly" then from_date + 1.week
@@ -255,11 +255,11 @@ class Subscription < ApplicationRecord
     else from_date + 1.month
     end
   end
-  
+
   # 新しいbilling_cycle_typeに基づいた次回課金日計算
   def calculate_next_billing_date_from_cycle_type(from_date)
     interval = custom_interval.present? ? custom_interval : 1
-    
+
     next_date = case billing_cycle_type
     when "daily"
       if weekdays_only?
@@ -292,11 +292,11 @@ class Subscription < ApplicationRecord
     else
       from_date + 1.month
     end
-    
+
     # 祝日調整を適用
     apply_holiday_adjustment(next_date)
   end
-  
+
   # 次の平日を計算
   def calculate_next_weekday(from_date)
     next_date = from_date + 1.day
@@ -305,11 +305,11 @@ class Subscription < ApplicationRecord
     end
     next_date
   end
-  
+
   # 祝日調整を適用
   def apply_holiday_adjustment(date)
     return date if holiday_adjustment_none?
-    
+
     # 土日または日曜日の場合のみ調整
     if date.saturday? || date.sunday?
       case holiday_adjustment
@@ -324,7 +324,7 @@ class Subscription < ApplicationRecord
       date
     end
   end
-  
+
   # 直前の平日に調整
   def adjust_to_previous_weekday(date)
     adjusted_date = date
@@ -333,7 +333,7 @@ class Subscription < ApplicationRecord
     end
     adjusted_date
   end
-  
+
   # 直後の平日に調整
   def adjust_to_next_weekday(date)
     adjusted_date = date
@@ -383,15 +383,15 @@ class Subscription < ApplicationRecord
   # 年間コスト計算（新しいbilling_cycle_typeに対応）
   def annual_cost
     return 0.0 unless amount.present?
-    
+
     # 新しいbilling_cycle_typeがある場合
     if billing_cycle_type.present?
       return calculate_annual_cost_from_cycle_type
     end
-    
+
     # 古いbilling_cycleとの互換性
     return 0.0 unless billing_cycle.present?
-    
+
     case billing_cycle
     when "daily" then amount.to_f * 365
     when "weekly" then amount.to_f * 52
@@ -402,10 +402,10 @@ class Subscription < ApplicationRecord
     else amount.to_f * 12
     end
   end
-  
+
   def calculate_annual_cost_from_cycle_type
     interval = custom_interval.present? ? custom_interval : 1
-    
+
     case billing_cycle_type
     when "daily"
       if weekdays_only?

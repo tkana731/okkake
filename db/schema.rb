@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_02_165227) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_03_034549) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -64,6 +64,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_02_165227) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "reservation_type", default: "confirmed", null: false
+    t.datetime "lottery_announcement_time"
     t.index ["category_id"], name: "index_reservations_on_category_id"
     t.index ["reservation_type"], name: "index_reservations_on_reservation_type"
     t.index ["user_id"], name: "index_reservations_on_user_id"
